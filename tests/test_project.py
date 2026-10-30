@@ -114,7 +114,7 @@ class PackageTests(unittest.TestCase):
 class InstallTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory(prefix='whale smoke space ')
-        self.root=Path(self.temp.name)
+        self.root=Path(self.temp.name).resolve()
         self.package=fixture(self.root)
         self.home=self.root/'home'
         self.install_root=self.root/'application'
@@ -185,7 +185,7 @@ class InstallTests(unittest.TestCase):
         old=self.install()
         original=manage.atomic_json
         def fail_commit(path,value):
-            if path==manage.state_file(self.install_root):raise OSError('injected commit failure')
+            if path.resolve()==manage.state_file(self.install_root).resolve():raise OSError('injected commit failure')
             original(path,value)
         with mock.patch.object(manage,'atomic_json',side_effect=fail_commit):
             with self.assertRaises(OSError):self.install()

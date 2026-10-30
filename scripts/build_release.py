@@ -2,11 +2,13 @@
 import hashlib
 import json
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-version='1.0.0'
+sys.path.insert(0,str(ROOT/'app'))
+from codex_whale_pet import __version__ as version
 runtime=json.loads((ROOT/'runtime-files.json').read_text(encoding='utf-8'))['files']
 for relative,expected in runtime.items():
     file=ROOT/'runtime'/relative
