@@ -19,6 +19,10 @@ class NotReady(RuntimeError):
     """Codex or its visible native pet is not ready yet; publish this waiting state."""
 
 
+class DesktopUnavailable(NotReady):
+    """Windows temporarily withholds cursor access on a locked or secure input desktop."""
+
+
 class UnsupportedVersion(RuntimeError):
     pass
 
@@ -33,6 +37,8 @@ user.GetDpiForWindow.restype = wt.UINT
 user.IsWindowVisible.argtypes = [wt.HWND]
 user.GetWindowRect.argtypes = [wt.HWND, ct.POINTER(wt.RECT)]
 user.GetWindowThreadProcessId.argtypes = [wt.HWND, ct.POINTER(wt.DWORD)]
+user.GetCursorPos.argtypes = [ct.POINTER(wt.POINT)]
+user.GetCursorPos.restype = wt.BOOL
 user.MonitorFromWindow.argtypes = [wt.HWND, wt.DWORD]
 user.MonitorFromWindow.restype = wt.HMONITOR
 kernel.OpenProcess.argtypes = [wt.DWORD, wt.BOOL, wt.DWORD]
@@ -137,8 +143,14 @@ def geometry(home, allow_untested=False):
 
 def cursor():
     point = wt.POINT()
+    ct.set_last_error(0)
     if not user.GetCursorPos(ct.byref(point)):
-        raise ct.WinError(ct.get_last_error())
+        code=ct.get_last_error()
+        if code==5:
+            raise DesktopUnavailable('Windows input desktop is unavailable; cursor tracking is paused until access returns.')
+        if code==0:
+            raise RuntimeError('GetCursorPos failed without an extended error code.')
+        raise ct.WinError(code)
     return point.x, point.y
 
 

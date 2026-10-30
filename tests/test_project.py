@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from contextlib import contextmanager
 from unittest import mock
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -242,6 +243,70 @@ class WindowsBoundaryTests(unittest.TestCase):
             shutil.move(pet,home/'old-pet')
             pet.mkdir()
             self.assertTrue((control_dir(home)/'motion-stop').exists())
+
+    def test_cursor_access_denial_pauses_but_other_errors_are_visible(self):
+        from codex_whale_pet import windows as win
+        def denied(pointer):
+            win.ct.set_last_error(5)
+            return False
+        def available(pointer):
+            pointer._obj.x,pointer._obj.y=123,456
+            return True
+        def invalid(pointer):
+            win.ct.set_last_error(87)
+            return False
+        with mock.patch.object(win.user,'GetCursorPos',side_effect=denied):
+            with self.assertRaises(win.DesktopUnavailable):win.cursor()
+        with mock.patch.object(win.user,'GetCursorPos',side_effect=available):
+            self.assertEqual(win.cursor(),(123,456))
+        with mock.patch.object(win.user,'GetCursorPos',side_effect=invalid):
+            with self.assertRaises(OSError) as caught:win.cursor()
+            self.assertEqual(caught.exception.winerror,87)
+
+    def test_controller_resumes_after_desktop_denial_in_same_process(self):
+        from codex_whale_pet import controller,windows as win
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            package=fixture(root)
+            home=root/'home'
+            (home/'pets').mkdir(parents=True)
+            shutil.copytree(package/'pet',home/'pets/whale-musume')
+            states=[]
+            peers=[]
+            reads=[]
+            @contextmanager
+            def acquired():yield True
+            class Peer:
+                def __init__(self):peers.append(self)
+                def refresh(self):pass
+                def pump(self):pass
+                def close(self):pass
+            def read_cursor():
+                reads.append(True)
+                if len(reads)==1:raise win.DesktopUnavailable('simulated inaccessible input desktop')
+                atomic_bytes(control_dir(home)/'motion-stop',b'')
+                return 900,900
+            original=controller.atomic_json
+            def record(path,value):
+                if path.name=='motion-status.json':states.append((value['state'],value['pid']))
+                original(path,value)
+            layout={'center':(0,0),'scale':1,'width_dip':112}
+            with mock.patch.object(win,'single_controller',side_effect=acquired), \
+                 mock.patch.object(win,'PetRefresh',Peer), \
+                 mock.patch.object(win,'selected_pet',return_value='custom:whale-musume'), \
+                 mock.patch.object(win,'geometry',return_value=layout), \
+                 mock.patch.object(win,'cursor',side_effect=read_cursor), \
+                 mock.patch.object(win.user,'GetAsyncKeyState',return_value=0), \
+                 mock.patch.object(controller,'atomic_json',side_effect=record), \
+                 mock.patch.object(controller.time,'sleep'):
+                controller.run(home)
+            names=[name for name,pid in states]
+            self.assertIn('waiting_for_desktop',names)
+            self.assertIn('running',names)
+            self.assertNotIn('error',names)
+            self.assertEqual(len({pid for name,pid in states}),1)
+            self.assertEqual(len(peers),1,'Desktop loss must not unnecessarily reconnect the IPC client.')
+            self.assertEqual(names[-1],'stopped')
 
 
 if __name__=='__main__':unittest.main()

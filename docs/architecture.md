@@ -33,6 +33,8 @@
 
 `Start.cmd` 启动后台等待与重连，`Stop.cmd` 停止方向和悬停增强，保留官方 Pet 及其基准呼吸。未添加 Windows 登录自启，因此系统重启后需要再运行启动入口。
 
+`GetCursorPos`收到访问拒绝（错误5）时，进入显式的 `waiting_for_desktop` 状态，以同一进程/IPC等待可访问桌面恢复；不调用切换桌面的接口。Windows要求调用方拥有相应窗口站读取权限、位于当前输入桌面，见[微软接口说明](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos)。此处理仅用于鼠标读取：不会吞掉素材文件权限错误或其他API错误。
+
 安装前存在同名 Pet 时保留备份；卸载恢复该备份。原先没有同名 Pet 时，卸载删除本项目安装的那个。卸载保留其他宠物、配置和登录状态。
 
 ## 依赖与限制

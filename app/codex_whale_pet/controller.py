@@ -116,6 +116,16 @@ def run(home, allow_untested=False):
                         last_action=None
                     status('running')
                     time.sleep(.06)
+                except win.DesktopUnavailable as error:
+                    try:
+                        switch(BASE)
+                    except win.NotReady:
+                        ipc.close()
+                        ipc=None
+                    layout,last_action=None,None
+                    follow,hover=FollowState(),HoverState(actions)
+                    status('waiting_for_desktop',str(error))
+                    time.sleep(.5)
                 except win.NotReady as error:
                     if ipc:
                         ipc.close()
