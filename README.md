@@ -18,7 +18,7 @@
 
 ## 安装和启动
 
-1. 从 [Releases](https://github.com/putee7/codex-whale-musume/releases) 下载发布包，解压后运行 `Install.cmd`。发布包包含项目专用的 CPython 3.13.17，无需另装 Python，也不安装到全局。
+1. 从 [Releases](https://github.com/putee7/codex-ds-whale/releases) 下载发布包，解压后运行 `Install.cmd`。发布包包含项目专用的 CPython 3.13.17，无需另装 Python，也不安装到全局。
 2. 打开 Codex，在 **设置 → Mini 与虚拟宠物** 刷新并选择“鲸鱼娘”，显示官方 Mini。
 3. 运行 `Start.cmd`，启动后台控制器。它会等待 Codex 打开、鲸鱼娘被选中及 Mini 显示，条件满足后自动连接。
 
