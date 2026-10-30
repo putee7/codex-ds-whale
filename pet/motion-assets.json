@@ -1,0 +1,25 @@
+{
+  "source_sha256": "00fc42ce8fef3b7b640856e7ecb492e4f77beda74e07d267848f5fd9c7bde569",
+  "app_version": "26.1023.6621.0",
+  "bank": "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a",
+  "direction_extension": "webp",
+  "hover_source_sha256": "00fc42ce8fef3b7b640856e7ecb492e4f77beda74e07d267848f5fd9c7bde569",
+  "hover_live_path": "hover-bank/8b0cee78c72c/active.webp",
+  "hover_actions": {
+    "hop": {
+      "path": "hover-bank/8b0cee78c72c/hop.webp",
+      "sha256": "017c69acc65df756f850c5e94ccd082c446776a6b9bc606103cd9c41e8d63fd0",
+      "hold_ms": 2800
+    },
+    "waving": {
+      "path": "hover-bank/8b0cee78c72c/waving.webp",
+      "sha256": "fd1ed660a7e21ba43fce950fbc2de34ef441811d04341cc12e8c87783e08420c",
+      "hold_ms": 2800
+    },
+    "eating": {
+      "path": "hover-bank/8b0cee78c72c/eating.webp",
+      "sha256": "fdaa703716c9308de7cb12f1428ec9154eed6c75ba5bd9e2c71d552c023e7b46",
+      "hold_ms": 3600
+    }
+  }
+}

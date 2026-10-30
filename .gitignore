@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+runtime/
+dist/
+build/
+*.log
+PROJECT_LOG.md
+install-state.json
+.codex/
+.env*
+!.env.example
+.DS_Store
+Thumbs.db
