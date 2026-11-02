@@ -18,15 +18,20 @@ def local_config(original,expected):
     selected=tomllib.loads(text).get('desktop',{}).get('selected-avatar-id')
     if selected==PET_ID or selected!=expected:
         return original  # A later manual choice takes precedence over a queued repair.
+    newline='\r\n' if '\r\n' in text else '\n'
     pattern=r'(^\[desktop\][ \t]*(?:#[^\r\n]*)?\r?\n)(.*?)(?=^\[|\Z)'
     def replace(section):
         body,count=re.subn(r'^(\s*selected-avatar-id\s*=\s*)(["\']).*?\2',
             lambda match:match[1]+json.dumps(PET_ID),section[2],count=1,flags=re.M)
-        if count!=1:
+        if count==0 and selected is None:
+            body='selected-avatar-id = '+json.dumps(PET_ID)+newline+body
+        elif count!=1:
             raise ValueError('Unsupported Pet selection TOML; configuration was not changed.')
         return section[1]+body
     updated,count=re.subn(pattern,replace,text,count=1,flags=re.M|re.S)
-    if count!=1 or tomllib.loads(updated).get('desktop',{}).get('selected-avatar-id')!=PET_ID:
+    if count==0 and selected is None and 'desktop' not in tomllib.loads(text):
+        updated=text+('' if not text or text.endswith('\n') else newline)+newline+'[desktop]'+newline+'selected-avatar-id = '+json.dumps(PET_ID)+newline
+    if tomllib.loads(updated).get('desktop',{}).get('selected-avatar-id')!=PET_ID:
         raise ValueError('Unsupported desktop TOML; configuration was not changed.')
     return (b'\xef\xbb\xbf' if original.startswith(b'\xef\xbb\xbf') else b'')+updated.encode('utf-8')
 
@@ -79,7 +84,7 @@ def maintain(home,is_closed):
         return None
     state=home/'.codex-global-state.json'
     config=home/'config.toml'
-    originals={state:state.read_bytes(),config:config.read_bytes()}
+    originals={state:state.read_bytes(),config:config.read_bytes() if config.exists() else b''}
     payload,aliases=local_state(originals[state])
     atoms=json.loads(originals[state].decode('utf-8-sig'))['electron-persisted-atom-state']
     retained=record.setdefault('original_migrations',{})
@@ -97,7 +102,7 @@ def maintain(home,is_closed):
         written=[]
         try:
             for file,data in changes.items():  # Two preferences must commit together, with checked rollback.
-                if not is_closed() or file.read_bytes()!=originals[file]:
+                if not is_closed() or (file.read_bytes() if file.exists() else b'')!=originals[file]:
                     raise RuntimeError('Codex started or preferences changed during repair; repair cancelled.')
                 atomic_bytes(file,data)
                 written.append(file)

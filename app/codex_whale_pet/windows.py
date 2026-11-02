@@ -11,7 +11,7 @@ from ctypes import wintypes as wt
 from pathlib import Path
 
 APP_VERSION = '26.1023.6621.0'
-TESTED_VERSIONS = (APP_VERSION,)
+TESTED_VERSIONS = (APP_VERSION, '26.1027.3384.0')
 INTERFACE_VERSIONS = (APP_VERSION, '26.1027.3384.0')
 PET_ID = 'custom:whale-musume'
 MUTEX = 'Local\\WhaleNativePetAssetController'

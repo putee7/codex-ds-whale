@@ -4,7 +4,7 @@
 
 这是社区项目。无需修改 Codex 客户端，不创建第二个桌宠窗口。角色源自 [Sutera-Diffusus/dsh-whale-musume](https://github.com/Sutera-Diffusus/dsh-whale-musume)，沿用其 MIT 许可；新增动作使用 ImageGen 制作。
 
-当前 `main` 包含 v1.1.0 更新恢复修复，正式 ZIP 仍为 v1.0.2。新版的关闭后偏好修复已通过回归测试，本机真实画面仍待重开 Codex 后验收；通过前暂不替换正式下载包。
+当前版本 **v1.1.0**。升级用户直接运行新版 `Install.cmd`，程序迁移到唯一目录；下载统一使用[最新 Windows 离线包](https://github.com/putee7/codex-ds-whale/releases/latest)，变更见 [CHANGELOG](CHANGELOG.md)。
 
 | 小跳 | 挥手 | 吃饭 |
 | --- | --- | --- |
@@ -15,12 +15,12 @@
 ## 使用前
 
 - 仅支持 **Windows 10/11 x64**。
-- 原有动作在 **Codex 26.1023.6621.0** 实测；**26.1027.3384.0** 的进程、官方窗口与 IPC 已核验。v1.1.0 起按实际接口检查后尝试恢复，版本号变化不再单独阻止启动；未来版本不因此被标记为已验证。
+- 已在 **Codex 26.1023.6621.0、26.1027.3384.0** 实测；新版重开后，转头、注视呼吸及三种悬停动作均获用户确认恢复。v1.1.0 起按实际接口检查后尝试恢复，版本号变化不再单独阻止启动；未来版本不因此被标记为已验证。
 - 增强依赖内部本机 IPC `query-cache-invalidate`，不是公开稳定的 Pet 扩展 API。Codex 更新后可能需要适配。详见[兼容性](docs/compatibility.md)。
 
 ## 安装和启动
 
-1. 从 [Releases](https://github.com/putee7/codex-ds-whale/releases) 下载发布包，解压后运行 `Install.cmd`。发布包包含项目专用的 CPython 3.13.17，无需另装 Python，也不安装到全局。
+1. 从[最新 Release](https://github.com/putee7/codex-ds-whale/releases/latest) 下载 Windows x64 ZIP，解压后运行 `Install.cmd`。发布包包含项目专用的 CPython 3.13.17，无需另装 Python，也不安装到全局。
 2. 如果安装时 Codex 正在运行，请**完全退出 Codex，等约 5 秒再打开**。后台控制器会在客户端关闭后设置本地素材模式，避免自动迁到无法持续读取本地动态图集的云端副本。
 3. 在 **设置 → Mini 与虚拟宠物** 选择本地“鲸鱼娘”，显示官方 Mini。安装会通过当前用户的计划任务运行唯一后台控制器，不依赖 Codex 父进程存活。`--no-start` 安装不会启动、注册任务或排队修改偏好。
 

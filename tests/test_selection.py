@@ -4,6 +4,7 @@ import itertools
 import shutil
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -68,6 +69,22 @@ class LocalModeTests(unittest.TestCase):
         selection.request(self.home,'pet_example')
         with self.assertRaises(ValueError):selection.maintain(self.home,lambda:True)
         self.assertEqual(self.state.read_bytes(),original)
+
+    def test_first_install_without_any_config_initializes_local_selection(self):
+        self.config.unlink()
+        selection.request(self.home,None)
+        selection.maintain(self.home,lambda:True)
+        self.assertEqual(tomllib.loads(self.config.read_text())['desktop']['selected-avatar-id'],PET_ID)
+
+    def test_first_selection_preserves_other_settings_with_or_without_desktop_section(self):
+        for original in (b'# retained\r\n[another]\r\nvalue="unchanged"\r\n',b'[desktop]\nother=true\n[another]\nvalue="unchanged"\n'):
+            updated=selection.local_config(original,None)
+            before=tomllib.loads(original.decode())
+            after=tomllib.loads(updated.decode())
+            del after['desktop']['selected-avatar-id']
+            if not after['desktop']:
+                del after['desktop']
+            self.assertEqual(after,before)
 
     def test_cloud_whale_is_identified_before_repair(self):
         self.assertTrue(selection.migrated(self.home,'pet_example'))
