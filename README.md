@@ -4,6 +4,8 @@
 
 这是社区项目。无需修改 Codex 客户端，不创建第二个桌宠窗口。角色源自 [Sutera-Diffusus/dsh-whale-musume](https://github.com/Sutera-Diffusus/dsh-whale-musume)，沿用其 MIT 许可；新增动作使用 ImageGen 制作。
 
+当前 `main` 包含 v1.1.0 更新恢复修复，正式 ZIP 仍为 v1.0.2。新版的关闭后偏好修复已通过回归测试，本机真实画面仍待重开 Codex 后验收；通过前暂不替换正式下载包。
+
 | 小跳 | 挥手 | 吃饭 |
 | --- | --- | --- |
 | ![小跳预览](docs/previews/hop.gif) | ![挥手预览](docs/previews/waving.gif) | ![铁盆吃白米饭预览](docs/previews/eating.gif) |
