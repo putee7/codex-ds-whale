@@ -121,9 +121,12 @@ class InstallTests(unittest.TestCase):
         self.install_root=self.root/'application'
         self.stop=mock.patch.object(manage,'stop')
         self.stop.start()
+        self.task=mock.patch('codex_whale_pet.recovery.task',return_value={})
+        self.task.start()
 
     def tearDown(self):
         self.stop.stop()
+        self.task.stop()
         self.temp.cleanup()
 
     def install(self):
@@ -277,6 +280,7 @@ class WindowsBoundaryTests(unittest.TestCase):
             @contextmanager
             def acquired():yield True
             class Peer:
+                version='26.1023.6621.0'
                 def __init__(self):peers.append(self)
                 def refresh(self):pass
                 def pump(self):pass
@@ -290,9 +294,10 @@ class WindowsBoundaryTests(unittest.TestCase):
             def record(path,value):
                 if path.name=='motion-status.json':states.append((value['state'],value['pid']))
                 original(path,value)
-            layout={'center':(0,0),'scale':1,'width_dip':112}
+            layout={'center':(0,0),'scale':1,'width_dip':112,'version':'26.1023.6621.0'}
             with mock.patch.object(win,'single_controller',side_effect=acquired), \
                  mock.patch.object(win,'PetRefresh',Peer), \
+                 mock.patch.object(win,'running_version',return_value='26.1023.6621.0'), \
                  mock.patch.object(win,'selected_pet',return_value='custom:whale-musume'), \
                  mock.patch.object(win,'geometry',return_value=layout), \
                  mock.patch.object(win,'cursor',side_effect=read_cursor), \

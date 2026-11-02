@@ -11,6 +11,8 @@ from ctypes import wintypes as wt
 from pathlib import Path
 
 APP_VERSION = '26.1023.6621.0'
+TESTED_VERSIONS = (APP_VERSION,)
+INTERFACE_VERSIONS = (APP_VERSION, '26.1027.3384.0')
 PET_ID = 'custom:whale-musume'
 MUTEX = 'Local\\WhaleNativePetAssetController'
 
@@ -71,6 +73,13 @@ def rect_tuple(rect):
     return [rect.left, rect.top, rect.right, rect.bottom]
 
 
+def package_version(executable):
+    if not executable.lower().endswith('\\app\\chatgpt.exe'):
+        return None
+    match=re.search(r'\\OpenAI\.Codex_(\d+\.\d+\.\d+\.\d+)_',executable,re.I)
+    return match[1] if match else None
+
+
 def native_windows(allow_untested=False):
     found, errors = [], []
     @ENUMPROC
@@ -84,14 +93,15 @@ def native_windows(allow_untested=False):
         executable = app_path(pid.value)
         if not executable.lower().endswith('\\app\\chatgpt.exe') or 'openai.codex_' not in executable.lower():
             return True
-        if not allow_untested and f'OpenAI.Codex_{APP_VERSION}_'.lower() not in executable.lower():
-            errors.append('Codex version changed; native Pet controller must be revalidated.')
+        version=package_version(executable)
+        if version is None:
+            errors.append('Codex package identity changed; native Pet geometry was not used.')
             return False
         rect, monitor = wt.RECT(), MonitorInfo(cbSize=ct.sizeof(MonitorInfo))
         if not user.GetWindowRect(hwnd, ct.byref(rect)) or not user.GetMonitorInfoW(user.MonitorFromWindow(hwnd, 2), ct.byref(monitor)):
             return True
         found.append({'hwnd': int(hwnd), 'pid': pid.value, 'rect': rect_tuple(rect),
-                      'monitor': rect_tuple(monitor.monitor), 'dpi': user.GetDpiForWindow(hwnd)})
+                      'monitor': rect_tuple(monitor.monitor), 'dpi': user.GetDpiForWindow(hwnd),'version':version})
         return True
     user.EnumWindows(visit, 0)
     if errors:
@@ -99,11 +109,57 @@ def native_windows(allow_untested=False):
     return found
 
 
+def running_version():
+    versions,seen=set(),set()
+    @ENUMPROC
+    def visit(hwnd,unused):
+        pid=wt.DWORD()
+        user.GetWindowThreadProcessId(hwnd,ct.byref(pid))
+        if pid.value not in seen:
+            seen.add(pid.value)
+            version=package_version(app_path(pid.value))
+            if version:
+                versions.add(version)
+        return True
+    user.EnumWindows(visit,0)  # Include hidden windows so preference tracking survives hiding Mini.
+    if len(versions)!=1:
+        raise NotReady('Codex is closed or switching application versions; waiting to reconnect.')
+    return versions.pop()
+
+
+def codex_processes():
+    """Include Codex background processes with no windows before editing offline preferences."""
+    class Entry(ct.Structure):
+        _fields_=[('size',wt.DWORD),('usage',wt.DWORD),('pid',wt.DWORD),('heap',ct.c_size_t),
+            ('module',wt.DWORD),('threads',wt.DWORD),('parent',wt.DWORD),('priority',ct.c_long),
+            ('flags',wt.DWORD),('exe',wt.WCHAR*260)]
+    kernel.CreateToolhelp32Snapshot.argtypes=[wt.DWORD,wt.DWORD]
+    kernel.CreateToolhelp32Snapshot.restype=wt.HANDLE
+    kernel.Process32FirstW.argtypes=[wt.HANDLE,ct.POINTER(Entry)]
+    kernel.Process32NextW.argtypes=[wt.HANDLE,ct.POINTER(Entry)]
+    snapshot=kernel.CreateToolhelp32Snapshot(2,0)
+    if snapshot==ct.c_void_p(-1).value:
+        raise ct.WinError(ct.get_last_error())
+    found=[]
+    try:
+        entry=Entry(size=ct.sizeof(Entry))
+        more=kernel.Process32FirstW(snapshot,ct.byref(entry))
+        while more:  # Toolhelp exposes process enumeration as First/Next calls.
+            if entry.exe.lower()=='chatgpt.exe' and package_version(app_path(entry.pid)):
+                found.append(entry.pid)
+            more=kernel.Process32NextW(snapshot,ct.byref(entry))
+        if ct.get_last_error()!=18:
+            raise ct.WinError(ct.get_last_error())
+        return found
+    finally:
+        kernel.CloseHandle(snapshot)
+
+
 def selected_pet(home):
     import tomllib
     if not (home/'config.toml').is_file():
         return None
-    return tomllib.loads((home/'config.toml').read_text(encoding='utf-8')).get('desktop', {}).get('selected-avatar-id')
+    return tomllib.loads((home/'config.toml').read_text(encoding='utf-8-sig')).get('desktop', {}).get('selected-avatar-id')
 
 
 def pet_settings(home):
@@ -262,8 +318,8 @@ def check_version(allow_untested=False):
     version=installed_version()
     if version is None:
         raise NotReady('Official Codex MSIX installation was not found.')
-    if version!=APP_VERSION and not allow_untested:
-        raise UnsupportedVersion(f'Codex {version} is untested; supported: {APP_VERSION}. Use --allow-untested only after reading docs/compatibility.md.')
+    # Version numbers alone do not change the contract. IPC initialization and native geometry
+    # remain mandatory on every connection; unknown protocols fail explicitly, before motion.
     return version
 
 

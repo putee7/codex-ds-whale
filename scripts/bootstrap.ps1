@@ -6,7 +6,7 @@ function Get-Sha256([string]$Path) {
     finally { $algorithm.Dispose(); $stream.Dispose() }
 }
 $action = $args[0]
-if ($action -notin @('install','start','stop','doctor','uninstall')) { throw 'Unknown command.' }
+if ($action -notin @('install','start','stop','doctor','uninstall','repair','enable-recovery','disable-recovery')) { throw 'Unknown command.' }
 $forward = @()
 if ($args.Count -gt 1) { $forward = $args[1..($args.Count-1)] }
 $packageRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))

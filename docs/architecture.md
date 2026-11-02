@@ -5,7 +5,7 @@
 ## 控制过程
 
 1. 等待 Codex 启动、鲸鱼娘被选中、官方 Mini 显示。
-2. 检查客户端版本，读取鼠标位置和窗口几何。
+2. 识别实际运行的 Codex 版本及唯一 Pet 窗口，检查 IPC 注册/协议，读取鼠标位置和窗口几何。版本号改变本身不再停止增强。
 3. 空闲且鼠标在附近时，选择 16 个方向之一；鼠标停在角色上时，持续随机轮换三种悬停动作。拖动优先，工作等官方动作保留。
 4. 更新同一宠物的当前素材并发送缓存失效通知。方向素材只调整注视相关的图像条带，悬停模板保留其他动作。
 5. Codex 关闭后等待重新连接；停止控制器时恢复基准呼吸素材，保留官方 Pet。
@@ -18,20 +18,27 @@
 | --- | --- |
 | Windows 鼠标位置 | 计算方向、范围和静止时间 |
 | 官方 Pet 窗口几何 | 定位角色和悬停区域 |
-| Codex 全局状态 JSON 中两个 Pet 设置键 | 读取角色位置和大小；会解析 JSON，只使用这两个键 |
-| `config.toml` 中 `desktop.selected-avatar-id` | 判断是否选中鲸鱼娘；不修改配置，不使用或输出无关字段 |
+| Codex 全局状态 JSON 的 Pet 位置/大小、迁移偏好 | 判断位置与云端/本地来源；客户端关闭后只修复鲸鱼娘的迁移映射与永久不迁移记录，其他值不变 |
+| `config.toml` 中 `desktop.selected-avatar-id` | 判断选择；排队修复后仅在值仍相同、客户端已全部关闭时替换该单项，保留其他字节 |
 | 同一宠物目录中的清单、素材 | 校验并更新鲸鱼娘画面，停止时恢复基准素材 |
 | 项目安装目录 | 保存程序、专用 Python 运行时、安装清单和本地错误日志 |
-| Codex home 下 `pet-tools/codex-whale-control` | 保存有所有权标记的启动/停止状态；升级交换 Pet 目录不会丢失停止标记 |
+| Codex home 下 `pet-tools/codex-whale-control` | 保存唯一安装绑定、实际程序身份、修复请求、私有偏好备份与自动恢复状态 |
+| 当前用户的项目专属计划任务 | 登录及每分钟检查是否需要重启控制器；无提权或密码；卸载移除 |
 | Codex home 下 `pet-repair-backups` | 保留安装前 Pet 备份，供失败回滚和卸载恢复使用 |
 
 不访问会话文件、`auth.json` 或登录令牌，不使用或输出无关配置/状态字段。IPC 使用控制器自己的新本机身份初始化，不复用用户认证信息。不注入进程、不启动额外桌宠窗口、不发送遥测。
 
-安装默认写入 `%LOCALAPPDATA%\CodexWhaleMusume` 与 `%CODEX_HOME%\pets\whale-musume`。未设置 `CODEX_HOME` 时使用 Codex 默认目录；`--home` 和 `--install-dir` 支持隔离测试和自定义位置。安装不修改 `config.toml` 的宠物选择。
+程序默认写入 Codex home 的 `pet-tools/codex-whale-runtime`，素材写入 `pets/whale-musume`。旧 AppData 安装经所有权校验后移动到唯一位置；维护入口统一转发。启动核对代码 SHA-256、版本、进程可执行文件及安装路径，不仅检查互斥锁。安装器拒绝同一 home 第二安装和旧版本降级。
 
 ## 生命周期
 
-`Start.cmd` 启动后台等待与重连，`Stop.cmd` 停止方向和悬停增强，保留官方 Pet 及其基准呼吸。未添加 Windows 登录自启，因此系统重启后需要再运行启动入口。
+`Start.cmd` 启动后台等待与重连，`Stop.cmd` 停止方向和悬停增强并保留持久暂停，官方 Pet 及基准呼吸继续保留。v1.1.0 普通安装默认启用当前用户的自动恢复任务，仅在已登录会话检查，控制器意外退出通常一分钟内重启。任务先检查暂停标记，恢复启动不会清掉该标记；手动 Start 才解除。任务注册遵循 [Windows 任务计划接口](https://learn.microsoft.com/en-us/windows/win32/taskschd/taskschedulerschema-logontrigger-triggergroup-element)，不修改 Codex 的启动程序。`DisableRecovery.cmd` 移除任务；`EnableRecovery.cmd` 可重新注册。
+
+计划任务直接运行控制器，不另派生一个受 Codex 生命周期影响的控制进程；任务不限执行时长，仍用互斥锁防止多开。意外退出后下一次分钟触发可恢复。
+
+当前客户端会自动迁移本地宠物，迁移后的云端 ID 直接下载云端图集，忽略本地 `pet.json`。本项目无法用云端快照实现持续的本地转头/呼吸，因此使用内部迁移失败记录 `failedPermanently` 对该 Pet 保留本地模式，并移除该 Pet 已有的本地→云端映射。账号云端选择及其他 Pet 保持不变。这不是官方公开的扩展协议，未知格式明确失败。
+
+`Repair.cmd` 先排队；Toolhelp 枚举确认所有 Codex 进程退出后才修复偏好与选择，写入前再次检查进程和原始字节。两个文件的修改具备私有备份与失败回滚。修复期间出现其他手动选择时保留该选择。客户端运行时不直接写选择，不把磁盘选择当作实际画面验收。卸载只恢复本项目仍拥有的迁移记录，保留之后的手动修改。
 
 `GetCursorPos`收到访问拒绝（错误5）时，进入显式的 `waiting_for_desktop` 状态，以同一进程/IPC等待可访问桌面恢复；不调用切换桌面的接口。Windows要求调用方拥有相应窗口站读取权限、位于当前输入桌面，见[微软接口说明](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos)。此处理仅用于鼠标读取：不会吞掉素材文件权限错误或其他API错误。
 
@@ -41,4 +48,4 @@
 
 Release 携带官方 CPython 3.13.17 嵌入式运行时，仅供本项目使用。源码 ZIP 安装时从 `python.org` 固定 URL 下载并校验 SHA-256；离线使用 Release。运行时原始许可随包保留。
 
-IPC 是内部版本相关机制，未使用公开稳定的 Pet 扩展 API。只对已验证版本默认启用增强，其他版本须显式选择 `--allow-untested`。这种选择不会把试运行变成已验证兼容。平台与版本信息见[兼容性说明](compatibility.md)。
+IPC 是内部版本相关机制，未使用公开稳定的 Pet 扩展 API。未知版本按实际接口检查后尝试，Doctor 保留未验证标识；失败明确报错，不把尝试等同于已验证兼容。平台与版本信息见[兼容性说明](compatibility.md)。

@@ -11,16 +11,82 @@ from pathlib import Path
 from . import __version__
 from .files import BASE, OWNER, atomic_bytes, atomic_json, contained, control_dir, read_json, verify_assets
 
+COMMANDS={'Start.cmd':'start','Stop.cmd':'stop','Doctor.cmd':'doctor','Repair.cmd':'repair',
+    'EnableRecovery.cmd':'enable-recovery','DisableRecovery.cmd':'disable-recovery'}
+
 
 def default_home():
     return Path(os.environ.get('CODEX_HOME', Path.home()/'.codex')).expanduser().resolve()
 
 
-def default_install():
+def default_install(home=None):
+    home=home or default_home()
+    pointer=control_dir(home)/'installation.json'
+    if pointer.exists():
+        binding=read_json(pointer)
+        if binding.get('owner')!=OWNER:
+            raise ValueError('Installation binding belongs to another owner.')
+        return Path(binding['install_root']).resolve()
+    return (home/'pet-tools/codex-whale-runtime').resolve()
+
+
+def bind(root,home):
+    atomic_json(control_dir(home,True)/'installation.json',{'owner':OWNER,'install_root':str(root.resolve())})
+
+
+def migrate_legacy(root,home):
+    """Move the owned legacy installation once; never leave another runtime copy."""
     local=os.environ.get('LOCALAPPDATA')
-    if not local:
-        raise ValueError('LOCALAPPDATA is unavailable; provide --install-dir explicitly.')
-    return (Path(local)/'CodexWhaleMusume').resolve()
+    legacy_file=Path(local)/'CodexWhaleMusume/install-state.json' if local else None
+    if legacy_file is None or not legacy_file.exists() or root.exists():
+        return
+    old=read_json(legacy_file)
+    if old.get('owner')!=OWNER or Path(old['codex_home']).resolve()!=home:
+        raise ValueError('Legacy installation ownership/home mismatch; no files were moved.')
+    if tuple(map(int,old['version'].split('.')))>tuple(map(int,__version__.split('.'))):
+        raise ValueError('Refusing to migrate/downgrade a newer installation with an older release.')
+    old_root=Path(old['install_root']).resolve()
+    state(old_root)
+    if root!=(home/'pet-tools/codex-whale-runtime').resolve() or root.is_relative_to(old_root) or old_root.is_relative_to(root):
+        raise ValueError('Legacy migration target must be the canonical Pet tools directory.')
+    from . import recovery
+    had_task=recovery.task(old_root,'query').get('registered',False)
+    stop(home)
+    if had_task:
+        recovery.task(old_root,'remove')
+    root.parent.mkdir(parents=True,exist_ok=True)
+    moved=False
+    try:
+        os.replace(old_root,root)
+        moved=True
+        record={**old,'install_root':str(root),'python':str(root/'runtime/python.exe'),'pythonw':str(root/'runtime/pythonw.exe')}
+        atomic_json(state_file(root),record)
+        bind(root,home)
+    except Exception:
+        if moved:
+            atomic_json(state_file(root),old)
+            os.replace(root,old_root)
+        if had_task:
+            recovery.task(old_root,'enable')
+        raise
+
+
+def runtime_identity(root):
+    import hashlib
+    source=sorted((root/'app').rglob('*.py'))
+    if not source:
+        raise ValueError('Installed application source is missing.')
+    return {'version':read_json(state_file(root))['version'],'install_root':str(root.resolve()),
+        'code_sha256':hashlib.sha256(b''.join(file.relative_to(root).as_posix().encode()+file.read_bytes() for file in source)).hexdigest()}
+
+
+def check_running(root,home):
+    started=read_json(control_dir(home)/'started.json')
+    identity=runtime_identity(root)
+    from .windows import app_path
+    if any(started.get(key)!=value for key,value in identity.items()) or Path(app_path(started['pid'])).resolve()!=Path(state(root)['pythonw']).resolve():
+        raise RuntimeError('A controller from another path or build is running. Stop it before starting this installation.')
+    return {**identity,'pid':started['pid']}
 
 
 def state_file(root):
@@ -71,6 +137,11 @@ def install(package,home,root,use_current_python=False):
     if package.is_relative_to(root) or root.is_relative_to(package):
         raise ValueError('Installation directory must be outside the extracted source/release folder.')
     previous_state=state(root) if state_file(root).exists() else None
+    bound=control_dir(home)/'installation.json'
+    if bound.exists() and default_install(home)!=root:
+        raise ValueError('This Codex home already has a canonical installation; upgrade that directory instead.')
+    if previous_state and tuple(map(int,previous_state['version'].split('.')))>tuple(map(int,__version__.split('.'))):
+        raise ValueError('Refusing to replace a newer installation with an older release.')
     if previous_state and Path(previous_state['codex_home']).resolve()!=home:
         raise ValueError('This install directory belongs to another CODEX_HOME; uninstall it first or use a separate --install-dir.')
     if root.exists() and any(root.iterdir()) and previous_state is None:
@@ -81,6 +152,9 @@ def install(package,home,root,use_current_python=False):
     bundled=(runtime/'python.exe').is_file()
     if not bundled and not use_current_python:
         raise ValueError('Bundled runtime is missing. Run Install.cmd, or explicitly use --use-current-python for source development.')
+    if previous_state is None and root==(home/'pet-tools/codex-whale-runtime').resolve():
+        migrate_legacy(root,home)
+        previous_state=state(root) if state_file(root).exists() else None
     home.mkdir(parents=True,exist_ok=True)
     root.parent.mkdir(parents=True,exist_ok=True)
     stage=Path(tempfile.mkdtemp(prefix='.whale-stage-',dir=home))
@@ -89,7 +163,9 @@ def install(package,home,root,use_current_python=False):
     backup=None
     activated=False
     swapped=[]
-    old_records={name:(root/name).read_bytes() if (root/name).exists() else None for name in ('assets-manifest.json','install-state.json')}
+    old_records={name:(root/name).read_bytes() if (root/name).exists() else None for name in ('assets-manifest.json','install-state.json',*COMMANDS)}
+    if any(payload is not None and not payload.startswith(b'@rem Codex Whale Musume owned launcher') for name,payload in old_records.items() if name in COMMANDS):
+        raise ValueError('An installed launcher was changed externally; no launcher was replaced.')
     try:
         shutil.copytree(package/'pet',stage/'pet')
         verify_assets(stage/'pet',manifest)
@@ -128,6 +204,9 @@ def install(package,home,root,use_current_python=False):
                 'original_backup':original_backup,'latest_backup':str(backup) if backup else None}
         atomic_json(root/'assets-manifest.json',manifest)
         atomic_json(state_file(root),record)
+        for name,action in COMMANDS.items():
+            atomic_bytes(root/name,('@rem Codex Whale Musume owned launcher\r\n@echo off\r\n"%~dp0runtime\\python.exe" "%~dp0app\\run.py" '+action+' %*\r\nif errorlevel 1 pause\r\n').encode('ascii'))
+        bind(root,home)
         return record
     except Exception:
         for name in ('app','runtime'):
@@ -155,7 +234,7 @@ def install(package,home,root,use_current_python=False):
             remove_child(root.parent,tools.name)
 
 
-def start(root,allow_untested=False):
+def start(root,allow_untested=False,resuming=False,inline=False):
     record=state(root)
     home=Path(record['codex_home'])
     verify_assets(home/'pets/whale-musume',read_json(root/'assets-manifest.json'),live=True)
@@ -164,20 +243,53 @@ def start(root,allow_untested=False):
     from .windows import check_version,controller_running
     version=check_version(allow_untested)
     if controller_running():
-        return {'state':'already_running','codex_version':version}
+        return {'state':'already_running','codex_version':version,**check_running(root,home)}
+    control=control_dir(home,create=True)
+    if resuming and (control/'motion-stop').exists():
+        return {'state':'paused'}
+    if not resuming:
+        (control/'motion-stop').unlink(missing_ok=True)
+        (home/'pets/whale-musume/motion-stop').unlink(missing_ok=True)
+        from .recovery import task
+        if task(root,'query').get('registered',False):
+            task(root,'run')
+            deadline=time.monotonic()+10
+            while time.monotonic()<deadline:  # Wait for the owned scheduled task to acquire its controller mutex.
+                if controller_running():
+                    try:
+                        return {'state':'started_by_scheduler',**check_running(root,home)}
+                    except (FileNotFoundError,RuntimeError):
+                        pass  # The mutex is acquired just before the new task writes its identity marker.
+                if (control/'motion-stop').exists():
+                    return {'state':'paused'}
+                time.sleep(.1)
+            raise RuntimeError('Scheduled controller did not start; inspect Doctor and recovery-status.json.')
+    if inline:
+        from .controller import run
+        record['controller_started']=True
+        atomic_json(state_file(root),record)
+        with (root/'controller-error.log').open('a',encoding='utf-8') as errors:
+            from contextlib import redirect_stderr
+            with redirect_stderr(errors):
+                run(home,allow_untested)
+        return read_json(home/'pets/whale-musume/motion-status.json')
     log=root/'controller-error.log'
     command=[record['pythonw'],str(root/'app/run.py'),'run','--home',str(home)]
     if allow_untested:
         command.append('--allow-untested')
     with log.open('ab') as errors:
-        control=control_dir(home,create=True)
-        (control/'motion-stop').unlink(missing_ok=True)
-        (home/'pets/whale-musume/motion-stop').unlink(missing_ok=True)
+        if resuming and (control/'motion-stop').exists():
+            return {'state':'paused'}
+        if not resuming:
+            (control/'motion-stop').unlink(missing_ok=True)
+            (home/'pets/whale-musume/motion-stop').unlink(missing_ok=True)
         record['controller_started']=True
         atomic_json(state_file(root),record)
         process=subprocess.Popen(command,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=errors,
             creationflags=subprocess.CREATE_NO_WINDOW|subprocess.DETACHED_PROCESS)
     time.sleep(1)
+    if resuming and (control/'motion-stop').exists():
+        return {'state':'paused'}
     if process.poll() is not None and process.returncode!=0:
         raise RuntimeError(f'Controller failed; see {log.name}.')
     path=home/'pets/whale-musume/motion-status.json'
@@ -194,14 +306,28 @@ def doctor(root):
     home=Path(record['codex_home'])
     metadata=verify_assets(home/'pets/whale-musume',read_json(root/'assets-manifest.json'),live=True)
     result={'installed_version':record['version'],'asset_checksums':'ok','runtime_exists':Path(record['python']).is_file(),
-            'pet_id':'whale-musume','motion_master':metadata['source_sha256']}
+            'pet_id':'whale-musume','motion_master':metadata['source_sha256'],'installation':runtime_identity(root)}
     path=home/'pets/whale-musume/motion-status.json'
     result['controller']=read_json(path) if path.exists() else {'state':'not_started'}
     if os.name=='nt':
-        from .windows import APP_VERSION,installed_version,selected_pet
+        from .windows import APP_VERSION,TESTED_VERSIONS,controller_running,installed_version,selected_pet
         version=installed_version()
-        result.update(codex_version=version,tested_codex_version=APP_VERSION,version_tested=version==APP_VERSION,
+        result.update(codex_version=version,tested_codex_version=APP_VERSION,tested_codex_versions=TESTED_VERSIONS,version_tested=version in TESTED_VERSIONS,
                       whale_selected=selected_pet(home)=='custom:whale-musume')
+        result['controller_running']=controller_running()
+        if result['controller_running']:
+            result['running_identity']=check_running(root,home)
+        from .selection import migrated
+        result['selection_source']='local' if result['whale_selected'] else 'migrated_cloud_whale' if migrated(home,selected_pet(home)) else 'other'
+        local_mode=control_dir(home)/'local-mode.json'
+        result['local_mode']=read_json(local_mode).get('state') if local_mode.exists() else 'not_configured'
+        if not result['controller_running']:
+            result['controller']={**result['controller'],'last_recorded_state':result['controller']['state'],'state':'not_running'}
+        from .recovery import task
+        result['recovery']=task(root,'query')
+        recovery_status=control_dir(home)/'recovery-status.json'
+        if recovery_status.exists():
+            result['recovery']['last_attempt']=read_json(recovery_status)
     return result
 
 
@@ -217,7 +343,15 @@ def uninstall(root):
     original=Path(record['original_backup']).resolve() if record.get('original_backup') else None
     if original and (not original.is_relative_to((home/'pet-repair-backups').resolve()) or not original.is_dir()):
         raise ValueError('Original Pet backup is missing or outside its backup directory; nothing was removed.')
+    had_recovery=False
+    if os.name=='nt':
+        from .recovery import task
+        from .selection import restore_migration_preferences
+        from .windows import codex_processes
+        had_recovery=task(root,'query').get('registered',False)
     stop(home,expect_running=bool(record.get('controller_started')))
+    if had_recovery:
+        task(root,'remove')
     pet_backup=home/'pet-repair-backups'/('uninstall-'+uuid.uuid4().hex)
     pet_backup.mkdir(parents=True)
     tools=Path(tempfile.mkdtemp(prefix='.whale-uninstall-',dir=root.parent))
@@ -228,10 +362,12 @@ def uninstall(root):
         if original:
             os.replace(original,pet)
             restored=True
-        for name in ('app','runtime','assets-manifest.json','controller-error.log','install-state.json'):
+        for name in ('app','runtime','assets-manifest.json','controller-error.log','install-state.json',*COMMANDS):
             if (root/name).exists():
                 os.replace(root/name,tools/name)
                 moved.append(name)
+        if os.name=='nt':
+            restore_migration_preferences(home,lambda:not codex_processes())
     except Exception:
         for name in reversed(moved):
             os.replace(tools/name,root/name)
@@ -239,6 +375,8 @@ def uninstall(root):
             os.replace(pet,original)
         if (pet_backup/'removed-pet').exists():
             os.replace(pet_backup/'removed-pet',pet)
+        if had_recovery:
+            task(root,'enable')
         raise
     else:
         remove_child(home/'pet-repair-backups',pet_backup.name)

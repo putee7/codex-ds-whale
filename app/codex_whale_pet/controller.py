@@ -2,16 +2,17 @@
 import os
 import time
 import uuid
+from pathlib import Path
 
 from .behavior import FollowState, HoverState, on_body, replay_webp
 from .files import BASE, PET_ID, OWNER, atomic_bytes, atomic_json, contained, control_dir, digest, read_json
+from . import __version__,selection
 
 
 def run(home, allow_untested=False):
     from . import windows as win
     control=control_dir(home,create=True)
     stop_path=control/'motion-stop'
-    atomic_json(control/'started.json',{'owner':OWNER,'pid':os.getpid()})
     if stop_path.exists():
         return
     folder=home/'pets/whale-musume'
@@ -35,6 +36,15 @@ def run(home, allow_untested=False):
     follow,hover=FollowState(),HoverState(actions)
     changes,last_write,last_mode,last_check,last_geometry_check,last_click,last_switch=0,0.,None,0.,0.,0.,0.
     layout,last_action=None,None
+    version,last_version_check=None,0.
+    last_maintenance=0.
+    repair_issue=None
+    root=Path(__file__).resolve().parents[2]
+    if (root/'install-state.json').exists():
+        from .manage import runtime_identity
+        runtime=runtime_identity(root)
+    else:
+        runtime={'version':__version__,'install_root':str(root)}
 
     def status(state,reason=None,force=False):
         nonlocal last_mode,last_write
@@ -45,7 +55,7 @@ def run(home, allow_untested=False):
                 'gaze_mode':('hover' if hover.current else 'hover_rest') if hover.inside else follow.reason,
                 'hover_action':hover.current,'active_asset':active_path,'asset_changes':changes,
                 'range_dip':500,'idle_seconds':4,'native_window_only':True,'client_files_modified':False,
-                'allow_untested':allow_untested})
+                'allow_untested':allow_untested,'codex_version':version,**runtime})
             last_mode,last_write=mode,time.monotonic()
 
     def switch(path,force=False):
@@ -69,6 +79,7 @@ def run(home, allow_untested=False):
             return
         if stop_path.exists():
             return
+        atomic_json(control/'started.json',{'owner':OWNER,'pid':os.getpid(),**runtime})
         status('starting',force=True)
         try:
             if stop_path.exists():
@@ -77,21 +88,37 @@ def run(home, allow_untested=False):
             switch(BASE)
             while not stop_path.exists():  # Windows cursor and native availability require a bounded polling loop.
                 try:
+                    now=time.monotonic()
+                    if version is None or now-last_version_check>=.5:
+                        observed=win.running_version()
+                        if version!=observed:
+                            layout,last_action=None,None
+                            follow,hover=FollowState(),HoverState(actions)
+                        version=observed
+                        last_version_check=now
                     if ipc is None:
                         ipc=win.PetRefresh()
                         ipc.refresh()
                     ipc.pump()
-                    now=time.monotonic()
                     if now-last_check>=.5:
                         if (folder/'spritesheet.webp').stat().st_mtime_ns!=source_mtime:
                             raise ValueError('Artwork changed; rebuild assets instead of overwriting active files.')
                         last_check=now
-                    if win.selected_pet(home)!=PET_ID:
+                    selected=win.selected_pet(home)
+                    if selected!=PET_ID:
                         switch(BASE)
                         follow,hover=FollowState(),HoverState(actions)
-                        status('waiting_for_selection','Select the whale in Codex Settings > Mini and pets.')
+                        if selection.migrated(home,selected):
+                            status('cloud_migration_conflict','The selected cloud whale does not read local motion assets. Run Repair.cmd, then close Codex once.')
+                        else:
+                            status('waiting_for_selection','Select the local whale in Codex Settings > Mini and pets.')
                         time.sleep(.5)
                         continue
+                    if layout is None or now-last_geometry_check>=.4:
+                        layout=win.geometry(home,allow_untested)
+                        if layout['version']!=version:
+                            raise win.NotReady('Codex is switching processes during an update; waiting to reconnect.')
+                        last_geometry_check=now
                     if win.user.GetAsyncKeyState(1)&0x8000:
                         last_click=now
                         time.sleep(.06)
@@ -99,9 +126,6 @@ def run(home, allow_untested=False):
                     if now-last_click<.15:
                         time.sleep(.06)
                         continue
-                    if layout is None or now-last_geometry_check>=.4:
-                        layout=win.geometry(home,allow_untested)
-                        last_geometry_check=now
                     point=win.cursor()
                     target=follow.update(point,layout['center'],layout['scale'],now)
                     action=hover.update(on_body(point,layout,6 if hover.inside else 0),now)
@@ -131,9 +155,16 @@ def run(home, allow_untested=False):
                         ipc.close()
                         ipc=None
                     switch(BASE)
+                    if now-last_maintenance>=2:
+                        last_maintenance=now
+                        try:
+                            selection.maintain(home,lambda:not win.codex_processes())
+                            repair_issue=None
+                        except (ValueError,RuntimeError) as repair_error:
+                            repair_issue=str(repair_error)
                     layout,last_action=None,None
                     follow,hover=FollowState(),HoverState(actions)
-                    status('waiting',str(error))
+                    status('repair_required' if repair_issue else 'waiting',repair_issue or str(error))
                     time.sleep(.5)
             status('stopped','Stop requested.',True)
         except Exception as error:
