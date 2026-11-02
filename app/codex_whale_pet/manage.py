@@ -37,10 +37,15 @@ def bind(root,home):
 def migrate_legacy(root,home):
     """Move the owned legacy installation once; never leave another runtime copy."""
     local=os.environ.get('LOCALAPPDATA')
-    legacy_file=Path(local)/'CodexWhaleMusume/install-state.json' if local else None
-    if legacy_file is None or not legacy_file.exists() or root.exists():
+    candidates=[Path(local)] if local else []
+    candidates.append(Path.home()/'AppData/Local/Packages/OpenAI.Codex_2p2nqsd0c76g0/LocalCache/Local')
+    files=[folder/'CodexWhaleMusume/install-state.json' for folder in candidates if (folder/'CodexWhaleMusume/install-state.json').exists()]
+    if not files or root.exists():
         return
-    old=read_json(legacy_file)
+    records={value['install_root']:value for value in map(read_json,files)}
+    if len(records)!=1:
+        raise ValueError('Multiple legacy runtime directories exist; resolve their ownership before upgrading.')
+    old=next(iter(records.values()))
     if old.get('owner')!=OWNER or Path(old['codex_home']).resolve()!=home:
         raise ValueError('Legacy installation ownership/home mismatch; no files were moved.')
     if tuple(map(int,old['version'].split('.')))>tuple(map(int,__version__.split('.'))):

@@ -100,6 +100,7 @@ def resume(root):
         elif win.controller_running():
             result={'state':'already_running',**manage.check_running(root,home)}
         else:
+            atomic_json(control/'recovery-status.json',{'state':'supervising','pid':os.getpid()})
             result=manage.start(root,resuming=True,inline=True)
         atomic_json(control/'recovery-status.json',result)
         return result
