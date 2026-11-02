@@ -3,6 +3,7 @@ import sys
 import tempfile
 import itertools
 import shutil
+import subprocess
 import unittest
 import xml.etree.ElementTree as ET
 from contextlib import contextmanager
@@ -15,6 +16,32 @@ from codex_whale_pet.files import OWNER,PET_ID,atomic_bytes,atomic_json,control_
 
 
 class TaskTests(unittest.TestCase):
+    @unittest.skipUnless(os.name=='nt','Windows process lifecycle')
+    def test_stop_waits_for_process_after_mutex_release(self):
+        from codex_whale_pet import windows as win
+        with tempfile.TemporaryDirectory() as temporary:
+            home=Path(temporary).resolve()
+            (home/'pets/whale-musume').mkdir(parents=True)
+            control=control_dir(home,True)
+            atomic_json(control/'started.json',{'owner':OWNER,'pid':123,'install_root':str(home/'runtime')})
+            with mock.patch.object(win,'controller_running',return_value=False),mock.patch.object(win,'wait_for_exit') as wait:
+                manage.stop(home)
+            self.assertEqual(wait.call_args.args[0],123)
+            self.assertEqual(wait.call_args.args[2],home/'runtime/runtime/pythonw.exe')
+
+    @unittest.skipUnless(os.name=='nt','Windows process lifecycle')
+    def test_actual_process_wait_covers_shutdown_and_timeout(self):
+        from codex_whale_pet import windows as win
+        process=subprocess.Popen([sys.executable,'-c','import time; time.sleep(.5)'])
+        try:
+            with self.assertRaises(TimeoutError):win.wait_for_exit(process.pid,0,sys.executable)
+            win.wait_for_exit(process.pid,5,sys.executable)
+            self.assertEqual(process.poll(),0)
+        finally:
+            if process.poll() is None:
+                process.terminate()
+                process.wait(timeout=5)
+
     def test_task_has_no_elevation_and_uses_quoted_installed_entrypoint(self):
         root=Path(tempfile.gettempdir())/'whale space & bracket [test]'
         record={'pythonw':str(root/'runtime/pythonw.exe'),'install_root':str(root)}

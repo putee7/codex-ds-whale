@@ -127,12 +127,16 @@ def stop(home,timeout=10,expect_running=True):
         return  # A no-start installation with no registered process cannot own the global mutex.
     if os.name!='nt':
         return
-    from .windows import controller_running
+    from .windows import controller_running,wait_for_exit
+    started=read_json(control/'started.json') if (control/'started.json').exists() else None
     deadline=time.monotonic()+timeout
     while controller_running() and time.monotonic()<deadline:  # Wait only for our named controller; never kill a process.
         time.sleep(.1)
     if controller_running():
         raise TimeoutError('Controller did not stop; no files were replaced.')
+    if started and started.get('owner')==OWNER:
+        executable=Path(started['install_root'])/'runtime/pythonw.exe' if started.get('install_root') else None
+        wait_for_exit(started['pid'],max(0,deadline-time.monotonic()),executable)
 
 
 def install(package,home,root,use_current_python=False):

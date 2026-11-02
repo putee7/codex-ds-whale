@@ -335,6 +335,30 @@ def controller_running():
     return False
 
 
+def wait_for_exit(pid,timeout,executable=None):
+    """A released controller mutex precedes Python DLL unload; wait for the actual process."""
+    kernel.WaitForSingleObject.argtypes=[wt.HANDLE,wt.DWORD]
+    kernel.WaitForSingleObject.restype=wt.DWORD
+    handle=kernel.OpenProcess(0x100000|0x1000,False,pid)
+    if not handle:
+        if ct.get_last_error()==87:
+            return  # The recorded process has already exited.
+        raise ct.WinError(ct.get_last_error())
+    try:
+        value,size=ct.create_unicode_buffer(32768),wt.DWORD(32768)
+        if not kernel.QueryFullProcessImageNameW(handle,0,value,ct.byref(size)):
+            raise ct.WinError(ct.get_last_error())
+        if executable and Path(value.value).resolve()!=Path(executable).resolve():
+            return  # PID was reused after our process exited; do not wait on another application.
+        result=kernel.WaitForSingleObject(handle,max(0,int(timeout*1000)))
+        if result==258:
+            raise TimeoutError('Controller process is still unloading; no runtime files were replaced.')
+        if result!=0:
+            raise ct.WinError(ct.get_last_error())
+    finally:
+        kernel.CloseHandle(handle)
+
+
 @contextmanager
 def single_controller():
     kernel.CreateMutexW.argtypes=[ct.c_void_p,wt.BOOL,wt.LPCWSTR]
