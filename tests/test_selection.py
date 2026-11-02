@@ -18,7 +18,7 @@ class LocalModeTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.home=Path(self.temp.name)
+        self.home=Path(self.temp.name).resolve()
         self.value={'unrelated':{'untouched-user-data':[1,2,3]},'electron-persisted-atom-state':{
             selection.MIGRATED:{'account':{PET_ID:'pet_example','custom:other':'pet_other'}},
             selection.PENDING:{'account':{'custom:other':{'failedPermanently':False}}},
