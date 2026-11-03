@@ -9,6 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 from atlas_encoding import clear_transparent_rgb,encode_fast_gaze_breath,encode_hover_action,encode_look_breath
+from build_modes import build_modes
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -71,6 +72,11 @@ def main():
     metadata={'source_sha256':master_sha,'app_version':'26.1023.6621.0','bank':gaze_name,'direction_extension':'webp',
         'hover_source_sha256':master_sha,'hover_live_path':hover_name+'/active.webp',
         'hover_actions':{name:{'path':hover_name+'/'+report['file'],'sha256':report['sha256'],'hold_ms':report['hold_ms']} for name,report in reports.items()}}
+    modes=build_modes(out/'.modes')
+    mode_name=f"mode-bank/{modes['revision']}"
+    (out/'mode-bank').mkdir()
+    os.replace(out/'.modes',out/mode_name)
+    metadata['activity_modes']={name:{**item,'path':mode_name+'/'+item['path']} for name,item in modes['modes'].items()}
     (out/'motion-assets.json').write_text(json.dumps(metadata,indent=2)+'\n',encoding='utf-8',newline='\n')
     for name in ('pet.json','LICENSE'):
         shutil.copy2(ROOT/'pet'/name,out/name)

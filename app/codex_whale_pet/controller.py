@@ -26,7 +26,10 @@ def run(home, allow_untested=False):
     live=metadata['hover_live_path']
     live_path=contained(folder,live)
     bank=metadata['bank']
-    owned={BASE,live,*(f'{bank}/{index:02}.webp' for index in range(16))}
+    modes=metadata['activity_modes']
+    if any(digest(contained(folder,value['path'],True))!=value['sha256'] for value in modes.values()):
+        raise ValueError('A work mode template was changed.')
+    owned={BASE,live,*(value['path'] for value in modes.values()),*(f'{bank}/{index:02}.webp' for index in range(16))}
     manifest_path=folder/'pet.json'
     expected={key:value for key,value in read_json(manifest_path).items() if key!='spritesheetPath'}
     status_path=folder/'motion-status.json'
@@ -39,6 +42,9 @@ def run(home, allow_untested=False):
     version,last_version_check=None,0.
     last_maintenance=0.
     repair_issue=None
+    activity_mode='idle'
+    activity_seen={}
+    previous_activity=None
     root=Path(__file__).resolve().parents[2]
     if (root/'install-state.json').exists():
         from .manage import runtime_identity
@@ -47,15 +53,22 @@ def run(home, allow_untested=False):
         runtime={'version':__version__,'install_root':str(root)}
 
     def status(state,reason=None,force=False):
-        nonlocal last_mode,last_write
-        mode=(state,reason,hover.current,active_path,changes)
+        nonlocal last_mode,last_write,previous_activity
+        if state=='running' and activity_mode!=previous_activity:
+            activity_seen[activity_mode]=activity_seen.get(activity_mode,0)+1
+            previous_activity=activity_mode
+        mode=(state,reason,hover.current,active_path,changes,activity_mode)
         if force or mode!=last_mode or time.monotonic()-last_write>=10:
             atomic_json(status_path,{'state':state,'reason':reason,'pid':os.getpid(),
                 'updated_at':time.strftime('%Y-%m-%dT%H:%M:%S'),'direction':follow.previous,
                 'gaze_mode':('hover' if hover.current else 'hover_rest') if hover.inside else follow.reason,
                 'hover_action':hover.current,'active_asset':active_path,'asset_changes':changes,
                 'range_dip':500,'idle_seconds':4,'native_window_only':True,'client_files_modified':False,
-                'allow_untested':allow_untested,'codex_version':version,**runtime})
+                'allow_untested':allow_untested,'codex_version':version,'activity_mode':activity_mode,
+                'activity_reason':ipc.activity.reason if ipc else 'disconnected',
+                'activity_error':(ipc.activity.error or ipc.discovery_error) if ipc else None,
+                'activity_modes_seen':activity_seen,
+                'observed_threads':sum(view.revision is not None for view in ipc.activity.views.values()) if ipc else 0,**runtime})
             last_mode,last_write=mode,time.monotonic()
 
     def switch(path,force=False):
@@ -97,7 +110,7 @@ def run(home, allow_untested=False):
                         version=observed
                         last_version_check=now
                     if ipc is None:
-                        ipc=win.PetRefresh()
+                        ipc=win.PetRefresh(home)
                         ipc.refresh()
                     ipc.pump()
                     if now-last_check>=.5:
@@ -129,7 +142,12 @@ def run(home, allow_untested=False):
                     point=win.cursor()
                     target=follow.update(point,layout['center'],layout['scale'],now)
                     action=hover.update(on_body(point,layout,6 if hover.inside else 0),now)
-                    path=live if action else BASE if hover.inside or target is None else f'{bank}/{target:02}.webp'
+                    activity_mode=ipc.activity.update(now)
+                    if activity_mode=='idle' and not hover.inside:
+                        absent=now-follow.last_motion
+                        activity_mode='sleep' if absent>=600 else 'afk' if absent>=180 else 'greeting' if now-ipc.connected_at<2 else 'idle'
+                    path=(live if action else BASE if hover.inside else modes[activity_mode]['path'] if activity_mode!='idle'
+                        else BASE if target is None else f'{bank}/{target:02}.webp')
                     triggered=action is not None and action!=last_action
                     if (path!=active_path or triggered) and now-last_switch>=.12:
                         if triggered:

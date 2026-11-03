@@ -21,5 +21,126 @@
       "sha256": "fdaa703716c9308de7cb12f1428ec9154eed6c75ba5bd9e2c71d552c023e7b46",
       "hold_ms": 3600
     }
+  },
+  "activity_modes": {
+    "thinking": {
+      "path": "mode-bank/6dff4cd313b8/thinking.webp",
+      "sha256": "6284167a6b505c337c4f85bd4254274f72932b7e0d2c5c75ffb01e7b74762b53",
+      "cycle_ms": 3200,
+      "label": "思考",
+      "pose": "thinking"
+    },
+    "working": {
+      "path": "mode-bank/6dff4cd313b8/running.webp",
+      "sha256": "bb202d5719f7f18e8d310b08ddd88eb26d8102f2f3f7f4697ffd6ed81435a2e5",
+      "cycle_ms": 3200,
+      "label": "工具执行",
+      "pose": "running"
+    },
+    "command": {
+      "path": "mode-bank/6dff4cd313b8/work-slack-phone.webp",
+      "sha256": "01e25001518463b15113fd32a7308e668a07b8750d4afd789b03f1b40e72f512",
+      "cycle_ms": 3200,
+      "label": "执行命令",
+      "pose": "work-slack-phone"
+    },
+    "editing": {
+      "path": "mode-bank/6dff4cd313b8/work-meeting.webp",
+      "sha256": "333a572ba4e036827ba5b7d44ba7fb9b34dfae38e5e008048ee1cc7a67082dd2",
+      "cycle_ms": 3200,
+      "label": "编辑文件",
+      "pose": "work-meeting"
+    },
+    "searching": {
+      "path": "mode-bank/6dff4cd313b8/work-idea.webp",
+      "sha256": "11a5bb886dcaedabad094b4d2b48846684e6316e2ce078676e592b66dcb40cc2",
+      "cycle_ms": 3200,
+      "label": "搜索与阅读",
+      "pose": "work-idea"
+    },
+    "testing": {
+      "path": "mode-bank/6dff4cd313b8/work-review.webp",
+      "sha256": "63c6b513ad1d7c96ba94bb76ba705711b6a9a8b941ce2463491c13d469b28dc7",
+      "cycle_ms": 3200,
+      "label": "运行测试",
+      "pose": "work-review"
+    },
+    "reviewing": {
+      "path": "mode-bank/6dff4cd313b8/work-review.webp",
+      "sha256": "63c6b513ad1d7c96ba94bb76ba705711b6a9a8b941ce2463491c13d469b28dc7",
+      "cycle_ms": 3200,
+      "label": "评审",
+      "pose": "work-review"
+    },
+    "deploying": {
+      "path": "mode-bank/6dff4cd313b8/work-deploy.webp",
+      "sha256": "420c9a7e2f171596966f0156e0b92fddf443ba296fa43e2be4461f6fd2d0e64e",
+      "cycle_ms": 3200,
+      "label": "部署与发布",
+      "pose": "work-deploy"
+    },
+    "debugging": {
+      "path": "mode-bank/6dff4cd313b8/work-debug.webp",
+      "sha256": "576f89813c3c2f2266bbd1d6605459a9cdcf29b5b07badf91219bf4b20a7849b",
+      "cycle_ms": 3200,
+      "label": "调试",
+      "pose": "work-debug"
+    },
+    "planning": {
+      "path": "mode-bank/6dff4cd313b8/work-idea.webp",
+      "sha256": "11a5bb886dcaedabad094b4d2b48846684e6316e2ce078676e592b66dcb40cc2",
+      "cycle_ms": 3200,
+      "label": "制定计划",
+      "pose": "work-idea"
+    },
+    "waiting": {
+      "path": "mode-bank/6dff4cd313b8/waiting.webp",
+      "sha256": "4506b5ca633aa58c305dd7c4879bcefefa92a781a5dc8a017ef43a619b2d33dd",
+      "cycle_ms": 3200,
+      "label": "等待审批或回答",
+      "pose": "waiting"
+    },
+    "success": {
+      "path": "mode-bank/6dff4cd313b8/success.webp",
+      "sha256": "7ae82de32f913fe3f6bc7dbd43ca964d8158e928e133bbc9eba708d6ec12547f",
+      "cycle_ms": 3200,
+      "label": "任务完成",
+      "pose": "success"
+    },
+    "failure": {
+      "path": "mode-bank/6dff4cd313b8/failure.webp",
+      "sha256": "be4c919cee150b0eab4ecc23e94b271ac71176d97245fda43e3846d3e69283fb",
+      "cycle_ms": 3200,
+      "label": "任务出错",
+      "pose": "failure"
+    },
+    "listening": {
+      "path": "mode-bank/6dff4cd313b8/curious.webp",
+      "sha256": "acaa4ff5b06a52a851f402f8dbbf2d2f8642833470dc6953a030c226b21f08f6",
+      "cycle_ms": 3200,
+      "label": "收到新任务",
+      "pose": "curious"
+    },
+    "afk": {
+      "path": "mode-bank/6dff4cd313b8/afk.webp",
+      "sha256": "b04e739e53f06f790075f9aced50f0f389dcbb128228cbb0598422e327befe18",
+      "cycle_ms": 3200,
+      "label": "离开",
+      "pose": "afk"
+    },
+    "sleep": {
+      "path": "mode-bank/6dff4cd313b8/sleep.webp",
+      "sha256": "10c3417fce15f34f0ae8bdb2baf0378d68a46ae5e2d2d57cc11731462614d257",
+      "cycle_ms": 3200,
+      "label": "睡眠",
+      "pose": "sleep"
+    },
+    "greeting": {
+      "path": "mode-bank/6dff4cd313b8/greet.webp",
+      "sha256": "cdf471014ad40f3f374d7f5689ca8d0ee25a1382b79adba5f5ace6adfbd7f21d",
+      "cycle_ms": 3200,
+      "label": "欢迎回来",
+      "pose": "greet"
+    }
   }
 }

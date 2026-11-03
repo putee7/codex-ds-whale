@@ -156,6 +156,9 @@ class LocalModeTests(unittest.TestCase):
         @contextmanager
         def acquired():yield True
         peer=mock.Mock()
+        from codex_whale_pet.activity import Activity
+        peer.activity=Activity()
+        peer.connected_at,peer.discovery_error=0.,None
         def cursor():
             (control_dir(self.home)/'motion-stop').touch()
             return 900,900

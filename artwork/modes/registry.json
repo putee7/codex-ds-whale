@@ -1,0 +1,23 @@
+{
+  "upstream": "https://github.com/Sutera-Diffusus/dsh-whale-musume",
+  "commit": "53551978177ce8ecb005ebef8b55395ffd0f172a",
+  "modes": {
+    "thinking": {"label": "思考", "pose": "thinking"},
+    "working": {"label": "工具执行", "pose": "running"},
+    "command": {"label": "执行命令", "pose": "work-slack-phone"},
+    "editing": {"label": "编辑文件", "pose": "work-meeting"},
+    "searching": {"label": "搜索与阅读", "pose": "work-idea"},
+    "testing": {"label": "运行测试", "pose": "work-review"},
+    "reviewing": {"label": "评审", "pose": "work-review"},
+    "deploying": {"label": "部署与发布", "pose": "work-deploy"},
+    "debugging": {"label": "调试", "pose": "work-debug"},
+    "planning": {"label": "制定计划", "pose": "work-idea"},
+    "waiting": {"label": "等待审批或回答", "pose": "waiting"},
+    "success": {"label": "任务完成", "pose": "success"},
+    "failure": {"label": "任务出错", "pose": "failure"},
+    "listening": {"label": "收到新任务", "pose": "curious"},
+    "afk": {"label": "离开", "pose": "afk"},
+    "sleep": {"label": "睡眠", "pose": "sleep"},
+    "greeting": {"label": "欢迎回来", "pose": "greet"}
+  }
+}

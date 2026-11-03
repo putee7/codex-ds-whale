@@ -41,8 +41,13 @@ def fixture(root):
     manifest={'id':'whale-musume','displayName':'Whale','description':'fixture','spriteVersionNumber':2,'spritesheetPath':BASE}
     atomic_json(pet/'pet.json',manifest)
     sha=hashlib.sha256(master).hexdigest()
+    mode_path=pet/'mode-bank/v1/pose.webp'
+    mode_path.parent.mkdir(parents=True)
+    mode_path.write_bytes(b'fixture mode')
+    names=json.loads((ROOT/'artwork/modes/registry.json').read_text(encoding='utf-8'))['modes']
     atomic_json(pet/'motion-assets.json',{'source_sha256':sha,'hover_source_sha256':sha,'bank':'gaze-bank/v1',
-        'hover_actions':actions,'hover_live_path':'hover-bank/v1/active.webp','app_version':'26.1023.6621.0'})
+        'hover_actions':actions,'hover_live_path':'hover-bank/v1/active.webp','app_version':'26.1023.6621.0',
+        'activity_modes':{name:{'path':'mode-bank/v1/pose.webp','sha256':digest(mode_path)} for name in names}})
     (pet/'LICENSE').write_text('fixture license',encoding='utf-8')
     checks={p.relative_to(pet).as_posix():{'bytes':p.stat().st_size,'sha256':digest(p)} for p in pet.rglob('*') if p.is_file()}
     atomic_json(package/'assets-manifest.json',{'schema':1,'pet_id':'whale-musume','pet_manifest':manifest,'files':checks})
@@ -103,6 +108,8 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(manifest['pet_manifest']['displayName'],'鲸鱼娘')
         self.assertNotIn('name',manifest['pet_manifest'])
         self.assertEqual(manifest['pet_manifest']['spriteVersionNumber'],2)
+        from codex_whale_pet.activity import REQUIRED_MODES
+        self.assertEqual(set(read_json(ROOT/'pet/motion-assets.json')['activity_modes']),REQUIRED_MODES)
 
     def test_traversal_and_missing_parent_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -281,7 +288,11 @@ class WindowsBoundaryTests(unittest.TestCase):
             def acquired():yield True
             class Peer:
                 version='26.1023.6621.0'
-                def __init__(self):peers.append(self)
+                def __init__(self,home):
+                    from codex_whale_pet.activity import Activity
+                    self.activity=Activity()
+                    self.connected_at,self.discovery_error=0.,None
+                    peers.append(self)
                 def refresh(self):pass
                 def pump(self):pass
                 def close(self):pass

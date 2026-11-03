@@ -3,100 +3,164 @@
   "pet_id": "whale-musume",
   "files": {
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/00.webp": {
-      "sha256": "cd946e13b0ec8f681a8beb291da2902ba8b986e113bfa2690ab63b9f6c724607",
-      "bytes": 5375420
+      "bytes": 5375420,
+      "sha256": "cd946e13b0ec8f681a8beb291da2902ba8b986e113bfa2690ab63b9f6c724607"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/01.webp": {
-      "sha256": "f4de20ff7276942b550e97941db7ea86805154ccff7432175ec1ec0a710f0ce1",
-      "bytes": 5363468
+      "bytes": 5363468,
+      "sha256": "f4de20ff7276942b550e97941db7ea86805154ccff7432175ec1ec0a710f0ce1"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/02.webp": {
-      "sha256": "00e6e57aabed3c9bd4c87a1912b04e4b1ec7ed5812c741332ea17d8c3fd2f803",
-      "bytes": 5366552
+      "bytes": 5366552,
+      "sha256": "00e6e57aabed3c9bd4c87a1912b04e4b1ec7ed5812c741332ea17d8c3fd2f803"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/03.webp": {
-      "sha256": "01f3a9d496979384ab28a2a8e06cd7c86fd94bd60e24c03ff23df4edb89ad7e2",
-      "bytes": 5364944
+      "bytes": 5364944,
+      "sha256": "01f3a9d496979384ab28a2a8e06cd7c86fd94bd60e24c03ff23df4edb89ad7e2"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/04.webp": {
-      "sha256": "2dd4a34b36f05a2f60f75f68a4aa0e55892506bd8d57dbfbd9bff46f30eef976",
-      "bytes": 5363650
+      "bytes": 5363650,
+      "sha256": "2dd4a34b36f05a2f60f75f68a4aa0e55892506bd8d57dbfbd9bff46f30eef976"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/05.webp": {
-      "sha256": "a35f14adebe85972ee11cb4ec154f74b07c78b47cf26b07ea349b722330105cd",
-      "bytes": 5367068
+      "bytes": 5367068,
+      "sha256": "a35f14adebe85972ee11cb4ec154f74b07c78b47cf26b07ea349b722330105cd"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/06.webp": {
-      "sha256": "8ed13ec1fbcea174f66c9ef7f756abc77b4e4f453ef179ecd7ec7093a4e85ba1",
-      "bytes": 5365414
+      "bytes": 5365414,
+      "sha256": "8ed13ec1fbcea174f66c9ef7f756abc77b4e4f453ef179ecd7ec7093a4e85ba1"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/07.webp": {
-      "sha256": "acdd53e24a5276f48031bcfc71d580a81e519298b1485bd57b5db9923ddad76d",
-      "bytes": 5362354
+      "bytes": 5362354,
+      "sha256": "acdd53e24a5276f48031bcfc71d580a81e519298b1485bd57b5db9923ddad76d"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/08.webp": {
-      "sha256": "b6ed0c0a39a543f6092a20ac577199e10e99ea11f2aa13c38aa98e83b7143dd3",
-      "bytes": 5381166
+      "bytes": 5381166,
+      "sha256": "b6ed0c0a39a543f6092a20ac577199e10e99ea11f2aa13c38aa98e83b7143dd3"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/09.webp": {
-      "sha256": "b57aeb59bbbf19f5627d804534edbb4771f2a32fcd039cb2f802f49ae6f2733c",
-      "bytes": 5371782
+      "bytes": 5371782,
+      "sha256": "b57aeb59bbbf19f5627d804534edbb4771f2a32fcd039cb2f802f49ae6f2733c"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/10.webp": {
-      "sha256": "3c52fa23a6ce7a05c6e07a0236ab9a4f95b9109bfeb5e4bc641a7f07f2c9bd47",
-      "bytes": 5355272
+      "bytes": 5355272,
+      "sha256": "3c52fa23a6ce7a05c6e07a0236ab9a4f95b9109bfeb5e4bc641a7f07f2c9bd47"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/11.webp": {
-      "sha256": "e27ca5da447ba7fd8db7b7997c5be08e305ce91f2ba2059fb1be51bd42ca2676",
-      "bytes": 5354092
+      "bytes": 5354092,
+      "sha256": "e27ca5da447ba7fd8db7b7997c5be08e305ce91f2ba2059fb1be51bd42ca2676"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/12.webp": {
-      "sha256": "e9998ddc8baccb86ebbf7c3360b15418a38777721e4655ea8c85a11fd049466e",
-      "bytes": 5356662
+      "bytes": 5356662,
+      "sha256": "e9998ddc8baccb86ebbf7c3360b15418a38777721e4655ea8c85a11fd049466e"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/13.webp": {
-      "sha256": "993452da08a1bf660ba714fd8a1336a4bb7dbf6c8e959326728e54f550fede36",
-      "bytes": 5359658
+      "bytes": 5359658,
+      "sha256": "993452da08a1bf660ba714fd8a1336a4bb7dbf6c8e959326728e54f550fede36"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/14.webp": {
-      "sha256": "26290249166a9b755091630d82c93e446ea34f24ccd1a8b80d646481cd4f933f",
-      "bytes": 5361740
+      "bytes": 5361740,
+      "sha256": "26290249166a9b755091630d82c93e446ea34f24ccd1a8b80d646481cd4f933f"
     },
     "gaze-bank/00fc42ce8fef3b7b-4395fd87bc9a/15.webp": {
-      "sha256": "2d2e201a9e538f8c1e66a88c1468009d3bce5b49b33810840a56c91f1798b4d5",
-      "bytes": 5369682
+      "bytes": 5369682,
+      "sha256": "2d2e201a9e538f8c1e66a88c1468009d3bce5b49b33810840a56c91f1798b4d5"
     },
     "hover-bank/8b0cee78c72c/eating.webp": {
-      "sha256": "fdaa703716c9308de7cb12f1428ec9154eed6c75ba5bd9e2c71d552c023e7b46",
-      "bytes": 3743364
+      "bytes": 3743364,
+      "sha256": "fdaa703716c9308de7cb12f1428ec9154eed6c75ba5bd9e2c71d552c023e7b46"
     },
     "hover-bank/8b0cee78c72c/hop.webp": {
-      "sha256": "017c69acc65df756f850c5e94ccd082c446776a6b9bc606103cd9c41e8d63fd0",
-      "bytes": 3373778
+      "bytes": 3373778,
+      "sha256": "017c69acc65df756f850c5e94ccd082c446776a6b9bc606103cd9c41e8d63fd0"
     },
     "hover-bank/8b0cee78c72c/waving.webp": {
-      "sha256": "fd1ed660a7e21ba43fce950fbc2de34ef441811d04341cc12e8c87783e08420c",
-      "bytes": 3458638
+      "bytes": 3458638,
+      "sha256": "fd1ed660a7e21ba43fce950fbc2de34ef441811d04341cc12e8c87783e08420c"
     },
     "LICENSE": {
-      "sha256": "172d20f42a1a3f34c05e1165c518f93c168d8a346c6b34066b39c1a4b37655fc",
-      "bytes": 1072
+      "bytes": 1072,
+      "sha256": "172d20f42a1a3f34c05e1165c518f93c168d8a346c6b34066b39c1a4b37655fc"
+    },
+    "mode-bank/6dff4cd313b8/afk.webp": {
+      "bytes": 1294156,
+      "sha256": "b04e739e53f06f790075f9aced50f0f389dcbb128228cbb0598422e327befe18"
+    },
+    "mode-bank/6dff4cd313b8/curious.webp": {
+      "bytes": 1323514,
+      "sha256": "acaa4ff5b06a52a851f402f8dbbf2d2f8642833470dc6953a030c226b21f08f6"
+    },
+    "mode-bank/6dff4cd313b8/failure.webp": {
+      "bytes": 1342610,
+      "sha256": "be4c919cee150b0eab4ecc23e94b271ac71176d97245fda43e3846d3e69283fb"
+    },
+    "mode-bank/6dff4cd313b8/greet.webp": {
+      "bytes": 1325964,
+      "sha256": "cdf471014ad40f3f374d7f5689ca8d0ee25a1382b79adba5f5ace6adfbd7f21d"
+    },
+    "mode-bank/6dff4cd313b8/registry.json": {
+      "bytes": 3786,
+      "sha256": "bec54f3bee58cef61996c6596d287f1e0d54ca94b684b5ae6e56029e2de4f0bc"
+    },
+    "mode-bank/6dff4cd313b8/running.webp": {
+      "bytes": 1334208,
+      "sha256": "bb202d5719f7f18e8d310b08ddd88eb26d8102f2f3f7f4697ffd6ed81435a2e5"
+    },
+    "mode-bank/6dff4cd313b8/sleep.webp": {
+      "bytes": 1394528,
+      "sha256": "10c3417fce15f34f0ae8bdb2baf0378d68a46ae5e2d2d57cc11731462614d257"
+    },
+    "mode-bank/6dff4cd313b8/success.webp": {
+      "bytes": 1342094,
+      "sha256": "7ae82de32f913fe3f6bc7dbd43ca964d8158e928e133bbc9eba708d6ec12547f"
+    },
+    "mode-bank/6dff4cd313b8/thinking.webp": {
+      "bytes": 1333258,
+      "sha256": "6284167a6b505c337c4f85bd4254274f72932b7e0d2c5c75ffb01e7b74762b53"
+    },
+    "mode-bank/6dff4cd313b8/waiting.webp": {
+      "bytes": 1320046,
+      "sha256": "4506b5ca633aa58c305dd7c4879bcefefa92a781a5dc8a017ef43a619b2d33dd"
+    },
+    "mode-bank/6dff4cd313b8/work-debug.webp": {
+      "bytes": 1376150,
+      "sha256": "576f89813c3c2f2266bbd1d6605459a9cdcf29b5b07badf91219bf4b20a7849b"
+    },
+    "mode-bank/6dff4cd313b8/work-deploy.webp": {
+      "bytes": 1370396,
+      "sha256": "420c9a7e2f171596966f0156e0b92fddf443ba296fa43e2be4461f6fd2d0e64e"
+    },
+    "mode-bank/6dff4cd313b8/work-idea.webp": {
+      "bytes": 1203748,
+      "sha256": "11a5bb886dcaedabad094b4d2b48846684e6316e2ce078676e592b66dcb40cc2"
+    },
+    "mode-bank/6dff4cd313b8/work-meeting.webp": {
+      "bytes": 1346564,
+      "sha256": "333a572ba4e036827ba5b7d44ba7fb9b34dfae38e5e008048ee1cc7a67082dd2"
+    },
+    "mode-bank/6dff4cd313b8/work-review.webp": {
+      "bytes": 1351942,
+      "sha256": "63c6b513ad1d7c96ba94bb76ba705711b6a9a8b941ce2463491c13d469b28dc7"
+    },
+    "mode-bank/6dff4cd313b8/work-slack-phone.webp": {
+      "bytes": 1276576,
+      "sha256": "01e25001518463b15113fd32a7308e668a07b8750d4afd789b03f1b40e72f512"
     },
     "motion-assets.json": {
-      "sha256": "0a4f6a0d4d2d93f750b553ee070df4aac2385777a81215c7fc98a80527ded13e",
-      "bytes": 929
+      "bytes": 5082,
+      "sha256": "8b36af4601d206e57fb2cd45c3cc4a4e3c6f9a6c8a88f6baf7f8ead42bc4317d"
     },
     "pet.json": {
-      "sha256": "b70eb0e2233187ad4082ab738b53a8213f94b7f2b4b02ff4a850a120743eb02f",
-      "bytes": 258
+      "bytes": 258,
+      "sha256": "b70eb0e2233187ad4082ab738b53a8213f94b7f2b4b02ff4a850a120743eb02f"
     },
     "spritesheet-look-breath.png": {
-      "sha256": "0547acb4179b342ef50d18d7940165e05db1a75bd00075936ae45afbf935778f",
-      "bytes": 6761475
+      "bytes": 6761475,
+      "sha256": "0547acb4179b342ef50d18d7940165e05db1a75bd00075936ae45afbf935778f"
     },
     "spritesheet.webp": {
-      "sha256": "00fc42ce8fef3b7b640856e7ecb492e4f77beda74e07d267848f5fd9c7bde569",
-      "bytes": 3300812
+      "bytes": 3300812,
+      "sha256": "00fc42ce8fef3b7b640856e7ecb492e4f77beda74e07d267848f5fd9c7bde569"
     }
   },
   "pet_manifest": {

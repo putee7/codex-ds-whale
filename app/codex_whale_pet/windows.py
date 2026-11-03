@@ -217,8 +217,12 @@ import time
 import uuid
 
 class PetRefresh:
-    """Normal own-client IPC registration; only the Pet cache invalidation broadcast is sent."""
-    def __init__(self):
+    """Own-client Pet refresh and read-only live activity subscriptions."""
+    def __init__(self,home=None):
+        from .activity import Activity
+        self.activity=Activity()
+        self.connected_at=time.monotonic()
+        self.home,self.last_discovery,self.discovery_error=home,0.,None
         try:
             self.pipe = open(r'\\.\pipe\codex-ipc', 'r+b', buffering=0)
         except OSError as error:
@@ -266,14 +270,29 @@ class PetRefresh:
                 break
             message = json.loads(self.buffer[4:size+4])
             del self.buffer[:size+4]
+            if message.get('type')=='broadcast':
+                self.activity.receive(message,self.client_id)
+                continue
             if message.get('type') != 'response' or message.get('requestId') != self.request_id:
                 continue  # Do not retain or log unrelated broadcasts or their parameters.
             self.client_id = (message.get('result') or {}).get('clientId')
             if message.get('error') or message.get('version', 0) != 0 or not isinstance(self.client_id, str):
                 raise RuntimeError('Own client initialization was rejected or protocol changed.')
+        if self.client_id:
+            if self.home is not None and time.monotonic()-self.last_discovery>=5:
+                from .activity import recent_threads
+                import sqlite3
+                try:
+                    self.activity.discover(recent_threads(self.home))
+                    self.discovery_error=None
+                except (ValueError,sqlite3.Error) as error:
+                    self.discovery_error='Activity discovery unavailable: '+str(error)
+                self.last_discovery=time.monotonic()
+            for host,thread in self.activity.unsubscriptions():self.following(host,thread,False)
+            for host,thread in self.activity.subscriptions():self.following(host,thread,True)
 
     def send(self, message):
-        assert message['method'] in ('initialize', 'query-cache-invalidate'), 'Unexpected outbound IPC operation.'
+        assert message['method'] in ('initialize','query-cache-invalidate','thread-stream-following-changed'), 'Unexpected outbound IPC operation.'
         data = json.dumps(message, separators=(',', ':')).encode('utf-8')
         payload = struct.pack('<I', len(data))+data
         try:
@@ -291,7 +310,14 @@ class PetRefresh:
                    'sourceClientId': self.client_id,
                    'params': {'queryKey': ['custom-avatars', 'by-id', PET_ID]}})
 
+    def following(self,host,thread,enabled):
+        self.send({'type':'broadcast','method':'thread-stream-following-changed','version':1,
+            'sourceClientId':self.client_id,'params':{'hostId':host,'conversationId':thread,'following':enabled}})
+
     def close(self):
+        for host,thread in self.activity.views:
+            try:self.following(host,thread,False)
+            except (OSError,NotReady):break  # A disconnected transport cannot unsubscribe; the broker removes its client.
         self.pipe.close()
 
     def disconnected_error(self,error):

@@ -32,6 +32,8 @@ SOFTWARE.
 
 本项目以原角色素材为基础制作方向注视、呼吸和动作模板。新增动作使用 OpenAI ImageGen 制作，吃饭提示词见 [docs/prompts/eating.md](docs/prompts/eating.md)。生成工具的使用不改变原始素材必须保留的署名和许可。
 
+v1.2.0 新增 15 张任务与陪伴姿势，逐字节取自上游提交 `53551978177ce8ecb005ebef8b55395ffd0f172a` 的 `assets/generated/dsh-whale-state-*.webp`。原图、原始 MIT 许可及 17 模式映射保存在 `artwork/modes/`；构建时完整缩放角色及道具，再编码轻呼吸，不裁掉尾巴或脚。未复制上游的界面注入或养成系统代码。
+
 交互设计参考了公开桌宠设计思路，未复制参考“大肥鱼”仓库的代码。本项目不是 OpenAI 或原角色作者的官方产品。
 
 ## CPython 嵌入式运行时
