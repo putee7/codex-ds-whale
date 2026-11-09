@@ -6,6 +6,8 @@
 
 当前版本 **v1.2.0**。升级用户直接运行新版 `Install.cmd`，程序升级到原唯一目录；下载统一使用[最新 Windows 离线包](https://github.com/putee7/codex-ds-whale/releases/latest)，变更见 [CHANGELOG](CHANGELOG.md)。
 
+2026-11-09 已核对 DSH 上游 **v2.5.3**：本轮没有新增角色姿势，更新集中在 DSH 界面的触屏、尺寸调节、重挂载及安装门禁。Codex 运行版无需更换，逐项适配与下次增量基线见[上游同步记录](docs/upstream-sync.md)。
+
 | 小跳 | 挥手 | 吃饭 |
 | --- | --- | --- |
 | ![小跳预览](docs/previews/hop.gif) | ![挥手预览](docs/previews/waving.gif) | ![铁盆吃白米饭预览](docs/previews/eating.gif) |
