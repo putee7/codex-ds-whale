@@ -46,9 +46,11 @@ def on_body(point, layout, margin=0):
 
 class HoverState:
     """Shuffle all registered actions once per round, never repeat across round boundaries."""
-    def __init__(self, actions, rng=None):
+    def __init__(self, actions, rng=None, extras=None):
         assert len(actions)>=2,'Hover requires at least two registered actions.'
         self.actions,self.rng=actions,rng or random.Random()
+        self.extras=extras or {}
+        self.extra_bag=[]
         self.bag,self.last=[],None
         self.current,self.inside,self.next_at,self.until=None,False,0.,0.
 
@@ -65,6 +67,13 @@ class HoverState:
             return None
         if now<self.next_at:
             return None
+        if not self.bag and self.extras and self.last in self.actions:
+            if not self.extra_bag:
+                self.extra_bag=list(self.extras)
+                self.rng.shuffle(self.extra_bag)
+            self.current=self.last=self.extra_bag.pop()
+            self.until=now+self.extras[self.current]['hold_ms']/1000
+            return self.current
         if not self.bag:
             self.bag=list(self.actions)
             self.rng.shuffle(self.bag)

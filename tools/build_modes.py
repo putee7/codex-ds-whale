@@ -23,7 +23,7 @@ def fit_pose(source):
     return clear_transparent_rgb(pose)
 
 
-def encode_mode(master,pose,output):
+def encode_mode(master,pose,output,method=4):
     uint24=lambda value:int(value).to_bytes(3,'little')
     parts=[webp_chunk(b'VP8X',bytes((0x12,0,0,0))+uint24(1535)+uint24(2287)),webp_chunk(b'ANIM',b'\0'*6)]
     composite=master.copy()
@@ -39,7 +39,7 @@ def encode_mode(master,pose,output):
         for (left,top,right,bottom),pause in rectangles:
             cropped=frame.crop((left,top,right,bottom))
             header=uint24(left//2)+uint24(top//2)+uint24(right-left-1)+uint24(bottom-top-1)+uint24(pause)+b'\x02'
-            parts.append(webp_chunk(b'ANMF',header+exact_webp_image_chunks(cropped)))
+            parts.append(webp_chunk(b'ANMF',header+exact_webp_image_chunks(cropped,method=method)))
             composite.paste(cropped,(left,top))
             expected.append(hashlib.sha256(composite.tobytes()).digest())
     payload=b'WEBP'+b''.join(parts)

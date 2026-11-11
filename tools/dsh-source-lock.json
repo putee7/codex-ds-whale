@@ -1,0 +1,138 @@
+{
+  "upstream": "PC2005-cloud/dsh-pet",
+  "commit": "c25386848f70f6e40902e4376f6e7b1e196bc326",
+  "animation": {
+    "think": {
+      "file": "dsh-pet/assets/webm/工作状态-思考冒泡.webm",
+      "git_blob_sha1": "51bc3bb2fb894e6f1499974d62a3d93592f91859",
+      "sha256": "b4a36cfa28ea5d7089e362a01972c6e880297c6dcd0d39f1994efd889a3c1be5"
+    },
+    "deep-think": {
+      "file": "dsh-pet/assets/webm/深度思考碎碎念.webm",
+      "git_blob_sha1": "5a40d5bfdfa818a1df37cef6405f10cd8b71961c",
+      "sha256": "db66867cd1f5bf68b0638fe1f966d0fdf95d1573523e60c77aa8913706118e82"
+    },
+    "busy": {
+      "file": "dsh-pet/assets/webm/工作状态-忙碌点按.webm",
+      "git_blob_sha1": "32bc6dbf65a7f1afa403520c3dd37980ca353e5f",
+      "sha256": "b5d702e0c04adb7b255ac702001c24da36c8bf95efc891f693f4976986ab2435"
+    },
+    "code": {
+      "file": "dsh-pet/assets/webm/写代码.webm",
+      "git_blob_sha1": "47902f235c11fadd22134dd71d2fbcc3a36a13fc",
+      "sha256": "0441287737cdbb993ce90dfa74c67ea4ea3549d8c8ea98946604668464589ed7"
+    },
+    "note": {
+      "file": "dsh-pet/assets/webm/轻快记录.webm",
+      "git_blob_sha1": "d0c1bc670b74450e53019b36366edbe54056a363",
+      "sha256": "1da04162fed5cd52bd4a6a6027a6902f50bda0969d34465bc2d332cf3679bbd5"
+    },
+    "organize": {
+      "file": "dsh-pet/assets/webm/工作状态-清点归档.webm",
+      "git_blob_sha1": "af694fb0013cbc0aa5313ab0221f417b4efdb14a",
+      "sha256": "8c84f58f3a9e7b912e1cbfd89f77eb3652053fc9b2844295c8440cb636305d3b"
+    },
+    "wait": {
+      "file": "dsh-pet/assets/webm/工作状态-原地踱步张望.webm",
+      "git_blob_sha1": "7b9459a1efdf4155f5ddd3beb07936fcc5c8a7ed",
+      "sha256": "a56c17ef901fa531324a46a04def2381f65922d319ec83dadde34d2a4669e411"
+    },
+    "celebrate": {
+      "file": "dsh-pet/assets/webm/工作状态-雀跃庆祝.webm",
+      "git_blob_sha1": "edd6645a8ee9b222c720fb20cfff3b715e92db9b",
+      "sha256": "3ff681051a0bb4f152d7535d64b7f3194c30298bf56d41e521216a278f135d3e"
+    },
+    "sigh": {
+      "file": "dsh-pet/assets/webm/工作状态-垂头叹气冒汗.webm",
+      "git_blob_sha1": "653ef82b71d52faa1d26a014afb7764f778926f7",
+      "sha256": "ab00c844e62221905574b4c070e0d7b6fa14fb2afa1064c27a160f10e25f7196"
+    },
+    "shy": {
+      "file": "dsh-pet/assets/webm/点击回应-害羞惊讶.webm",
+      "git_blob_sha1": "499b73c42844bd0268bff9044e0523fcae1c1b27",
+      "sha256": "a04968bbc46d1ebea07f81e5dabd93b0b67a9d07f1371e9887b33075134ad00d"
+    },
+    "tickle": {
+      "file": "dsh-pet/assets/webm/点击回应-挠痒咯咯笑.webm",
+      "git_blob_sha1": "d896eb9a91ca8eafa7f0af35a3073dc04a397742",
+      "sha256": "f228279219f4084323ca1bfef1604f7c77bb3f505d45a8d1747b5ac3f9f2393b"
+    },
+    "greet": {
+      "file": "dsh-pet/assets/webm/女仆屈膝礼仪.webm",
+      "git_blob_sha1": "0bcac6ada85e78527fcce020db73bf0b6eff41d3",
+      "sha256": "6536fb519ba73bbc338d30cf7286b14ffde1278b6d469c64573536dc0f896918"
+    },
+    "stretch": {
+      "file": "dsh-pet/assets/webm/超大伸懒腰.webm",
+      "git_blob_sha1": "689e04f120f9f678a9424dac6cadf4b6a0bd6e6b",
+      "sha256": "0ac66d918cc5efd49be1273c3830de73eae5f9bdcd5fcb968d1b2f9b487705ad"
+    },
+    "yawn": {
+      "file": "dsh-pet/assets/webm/哈欠连天.webm",
+      "git_blob_sha1": "63da356fa373ecf6256bc8f4deb9709577e2f18e",
+      "sha256": "2b23372e1ff2bc2f9078c09740708c960d4ea021f9fc3cca294d9df11e393ec8"
+    },
+    "sleep-in": {
+      "file": "dsh-pet/assets/webm/睡觉-开始.webm",
+      "git_blob_sha1": "cd3c9e42d140354a69c7ae9e2a42edafdf5c983a",
+      "sha256": "5352a208925e01e191c1529d07c61ae61bcda90d92f2b89549c25c949f207e11"
+    },
+    "sleep-loop": {
+      "file": "dsh-pet/assets/webm/睡觉-循环.webm",
+      "git_blob_sha1": "e91b946423a17ba81f3d27727c8e9c6b4ec52ae0",
+      "sha256": "b49deb9b8dae4b83f84b6dc49efd41fdb654b05ad08ac6c5083977e17ef1122c"
+    },
+    "sleep-out": {
+      "file": "dsh-pet/assets/webm/睡觉-起来.webm",
+      "git_blob_sha1": "dcea582e52937f6c3b10e2a331ff5a4a4b4d46cb",
+      "sha256": "a2a4832e546e7639782b74f998d8a6ebc2ec3b3b933c0bcc709487fb4d19ab46"
+    },
+    "snack": {
+      "file": "dsh-pet/assets/webm/大口吃零食.webm",
+      "git_blob_sha1": "ab57e48e28d0e0fb832549e1b546bed28f2eb3df",
+      "sha256": "fdacb534a828b0c669f22a54e8da9bb9b5d731e0132dd5ea946f7badc9229a39"
+    },
+    "rice": {
+      "file": "dsh-pet/assets/webm/吃白饭.webm",
+      "git_blob_sha1": "0f400023c2f036e6edc28033083d49f68686d347",
+      "sha256": "b620413d6fa303a0ed9168dc71453c3bddc10141a0b7edeff87dc2e6e054d502"
+    },
+    "hotpot": {
+      "file": "dsh-pet/assets/webm/涮火锅.webm",
+      "git_blob_sha1": "d3e99cf6d8694b5e83a3957793f8fc7a0fc2cc2a",
+      "sha256": "f0b345c22cf2841137d215a7b9d50252b8be0ede64887e91fdc9bd09843e3c8f"
+    }
+  },
+  "appearance": {
+    "base": {
+      "file": "dsh-pet/assets/webm/待机呼吸休闲.webm",
+      "git_blob_sha1": "fd64a428a2be1d3b4ff6cd7f9867dfe978ba0bbb",
+      "sha256": "deb965d05a85dacf5ff4a20faa757846f0d11679598c3ec578a5571487660395"
+    },
+    "look": {
+      "file": "dsh-pet/assets/webm/东张西望.webm",
+      "git_blob_sha1": "3ba4edb2cc647c51edd41b5a6c71eeee8c418ed0",
+      "sha256": "a20ed02ccc5e72075a3ca83fabb57d9aac5ded699f52d00ec6de72069799fcd5"
+    },
+    "drag": {
+      "file": "dsh-pet/assets/webm/被鼠标拖拽悬空反馈.webm",
+      "git_blob_sha1": "728f04b2997aa9ec4bdb87d1b9b14d7910bc7fd6",
+      "sha256": "31373a86026636eecc890db763760309360310eb095cf5575b13c9ca2a6cc80e"
+    },
+    "hop": {
+      "file": "dsh-pet/assets/webm/点击回应-开心跃动.webm",
+      "git_blob_sha1": "fb614abf8d19c650fb5bd4727b2585282733a996",
+      "sha256": "86dcb0c3dd7b651de9c107e927d57a5c4224599101706dbdcc782fa48bcd0ad7"
+    },
+    "wave": {
+      "file": "dsh-pet/assets/webm/点击回应-元气挥手.webm",
+      "git_blob_sha1": "f60556f06c386cfb569f76b0cfa2e34e34fdc362",
+      "sha256": "48cd729ccdcf746369942ea954d242e9afdd5643e1dac3827fa5e67450eb8776"
+    },
+    "alert": {
+      "file": "dsh-pet/assets/webm/点击回应-傲娇生气.webm",
+      "git_blob_sha1": "77c6461a1f8ced2dc7272f44192f37dd682becf8",
+      "sha256": "6b7176b98408cb649d1d37b6a6222a21aa6b128187e3e0b2d18550d35ab81064"
+    }
+  }
+}

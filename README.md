@@ -2,11 +2,13 @@
 
 让 Codex 官方 Mini 里的同一只鲸鱼娘跟随任务思考、搜索、编辑和执行工具，轻轻呼吸、看向鼠标，并在悬停时随机小跳、挥手、拿铁盆吃白米饭。
 
-这是社区项目。无需修改 Codex 客户端，不创建第二个桌宠窗口。角色源自 [Sutera-Diffusus/dsh-whale-musume](https://github.com/Sutera-Diffusus/dsh-whale-musume)，沿用其 MIT 许可；新增动作使用 ImageGen 制作。
+这是社区项目。无需修改 Codex 客户端，不创建第二个桌宠窗口。基础版角色源自 [Sutera-Diffusus/dsh-whale-musume](https://github.com/Sutera-Diffusus/dsh-whale-musume)，沿用其 MIT 许可；基础版新增动作使用 ImageGen 制作。
 
-当前版本 **v1.2.0**。升级用户直接运行新版 `Install.cmd`，程序升级到原唯一目录；下载统一使用[最新 Windows 离线包](https://github.com/putee7/codex-ds-whale/releases/latest)，变更见 [CHANGELOG](CHANGELOG.md)。
+源码版本 **v1.3.1**，支持 [DSH Q 版](docs/local-dsh.md)。[基础版 Windows 离线包](https://github.com/putee7/codex-ds-whale/releases/latest)目前为 **v1.2.0**；已安装 Q 版时，请使用 Q 版构建包升级。变更见 [CHANGELOG](CHANGELOG.md)。
 
 2026-11-09 已核对 DSH 上游 **v2.5.3**：本轮没有新增角色姿势，更新集中在 DSH 界面的触屏、尺寸调节、重挂载及安装门禁。Codex 运行版无需更换，逐项适配与下次增量基线见[上游同步记录](docs/upstream-sync.md)。
+
+Q 版参考 [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)，在同一官方鲸鱼娘上增加 20 段动画、工作状态内轮换和睡醒过渡。[构建与安装说明](docs/local-dsh.md)会校验上游素材；Q 版美术遵循[独立的 CC BY-NC-SA 4.0 许可](artwork/dsh-chibi/LICENSE.md)。下方预览是基础版。
 
 | 小跳 | 挥手 | 吃饭 |
 | --- | --- | --- |

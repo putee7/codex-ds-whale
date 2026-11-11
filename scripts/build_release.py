@@ -15,11 +15,11 @@ for relative,expected in runtime.items():
     if not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest()!=expected:
         raise SystemExit(f'Official runtime file mismatch: {relative}')
 tracked=subprocess.check_output(['git','ls-files','-z'],cwd=ROOT).decode().split('\0')
-tracked=[name for name in tracked if name]
+tracked=[name for name in tracked if name and (not name.startswith('artwork/dsh-chibi/') or name.endswith('/LICENSE.md'))]
 if not tracked:
     raise SystemExit('Stage the clean source tree before building a release.')
 for name in tracked:
-    if name=='PROJECT_LOG.md' or name.startswith(('.git/','runtime/')) or '__pycache__' in name:
+    if name=='PROJECT_LOG.md' or name.startswith(('.git/','runtime/','build/','pet/action-bank/')) or '__pycache__' in name:
         raise SystemExit(f'Private/generated file is tracked: {name}')
 out=ROOT/'dist'
 out.mkdir(exist_ok=True)

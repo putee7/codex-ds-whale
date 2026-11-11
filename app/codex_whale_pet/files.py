@@ -57,6 +57,13 @@ def contained(root, relative, exists=False):
     return target
 
 
+def owned_paths(metadata):
+    return {BASE,metadata['hover_live_path'],
+            *(item['path'] for item in metadata['activity_modes'].values()),
+            *(item['path'] for item in metadata.get('animation_bank',{}).get('clips',{}).values()),
+            *(f"{metadata['bank']}/{index:02}.webp" for index in range(16))}
+
+
 def verify_assets(pet, manifest, live=False):
     entries = manifest['files']
     if manifest.get('pet_id') != 'whale-musume' or len(entries) < 24:
@@ -85,10 +92,12 @@ def verify_assets(pet, manifest, live=False):
     for mode in modes.values():
         if digest(contained(pet,mode['path'],True))!=mode['sha256']:
             raise ValueError('Work mode does not match its checksum.')
+    from .playback import validate_bank
+    validate_bank(pet,metadata.get('animation_bank'),entries)
     if live:
         current=read_json(Path(pet)/'pet.json')
         expected=manifest['pet_manifest']
-        allowed={BASE,metadata['hover_live_path'],*(item['path'] for item in modes.values()),*(f"{metadata['bank']}/{index:02}.webp" for index in range(16))}
+        allowed=owned_paths(metadata)
         if {key:value for key,value in current.items() if key!='spritesheetPath'}!={key:value for key,value in expected.items() if key!='spritesheetPath'} or current['spritesheetPath'] not in allowed:
             raise ValueError('Live Pet manifest has an unexpected identity or image path.')
     return metadata

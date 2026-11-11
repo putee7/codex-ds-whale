@@ -18,7 +18,7 @@ def clear_transparent_rgb(image):
     return image
 
 
-def encode_look_breath(source,output):
+def encode_look_breath(source,output,idle_breath=False):
     base=Image.open(source).convert('RGBA')
     assert base.size==(1536,2288),'A v2 atlas is required.'
     frames=[]
@@ -26,8 +26,8 @@ def encode_look_breath(source,output):
     for offset in OFFSETS:
         frame=base.copy()
         if offset:
-            for row in (9,10):
-                for column in range(8):
+            for row,count in (((0,6),) if idle_breath else ())+((9,8),(10,8)):
+                for column in range(count):
                     box=(column*192,row*208,(column+1)*192,(row+1)*208)
                     pose=base.crop(box)
                     assert pose.getchannel('A').getbbox()[1]>1,'Insufficient headroom for one-pixel float.'
@@ -49,9 +49,10 @@ def encode_look_breath(source,output):
             encoded.seek(index)
             actual=encoded.convert('RGBA')
             assert actual.tobytes()==frames[index].tobytes(),'PNG encoding changed approved pixels.'
-            assert actual.crop((0,0,1536,1872)).tobytes()==base.crop((0,0,1536,1872)).tobytes()
+            unchanged=(0,208 if idle_breath else 0,1536,1872)
+            assert actual.crop(unchanged).tobytes()==base.crop(unchanged).tobytes()
     return {'ok':True,'mode':'local-apng-gaze-breath','container_frames':4,'cycle_ms':sum(DURATIONS),
-            'gaze_vertical_offsets_px':list(OFFSETS),'standard57_cells_pixel_identical_in_every_phase':True,
+            'gaze_vertical_offsets_px':list(OFFSETS),'standard57_cells_pixel_identical_in_every_phase':not idle_breath,
             'first_frame_pixel_identical_to_source':True,'source_art_redrawn':False,
             'bytes':output.stat().st_size,'sha256':hashlib.sha256(output.read_bytes()).hexdigest(),
             'reduced_motion_note':'Encoded gaze-cell animation is not stopped by the native JS frame timer.'}
@@ -61,9 +62,9 @@ def webp_chunk(kind, data):
     return kind+struct.pack('<I',len(data))+data+(b'\0' if len(data)%2 else b'')
 
 
-def exact_webp_image_chunks(image):
+def exact_webp_image_chunks(image,method=4):
     buffer=io.BytesIO()
-    image.save(buffer,format='WEBP',lossless=True,quality=100,exact=True,method=4)
+    image.save(buffer,format='WEBP',lossless=True,quality=100,exact=True,method=method)
     encoded=buffer.getvalue()
     offset,parts=12,[]
     while offset<len(encoded):  # RIFF is a sequential variable-length chunk format.
@@ -75,9 +76,9 @@ def exact_webp_image_chunks(image):
     return b''.join(parts)
 
 
-def encode_fast_gaze_breath(source,output):
+def encode_fast_gaze_breath(source,output,method=4):
     """Exact lossless RIFF frames update idle and look strips separately, avoiding full-atlas copies."""
-    base=Image.open(source).convert('RGBA')
+    base=source.copy() if isinstance(source,Image.Image) else Image.open(source).convert('RGBA')
     assert base.size==(1536,2288)
     uint24=lambda value:int(value).to_bytes(3,'little')
     parts=[webp_chunk(b'VP8X',bytes((0x12,0,0,0))+uint24(1535)+uint24(2287)),
@@ -98,7 +99,7 @@ def encode_fast_gaze_breath(source,output):
         for (left,top,right,bottom),pause in rectangles:
             cropped=frame.crop((left,top,right,bottom))
             header=uint24(left//2)+uint24(top//2)+uint24(right-left-1)+uint24(bottom-top-1)+uint24(pause)+b'\x02'
-            parts.append(webp_chunk(b'ANMF',header+exact_webp_image_chunks(cropped)))
+            parts.append(webp_chunk(b'ANMF',header+exact_webp_image_chunks(cropped,method=method)))
             composite.paste(cropped,(left,top))
             expected.append(composite.copy())
     payload=b'WEBP'+b''.join(parts)

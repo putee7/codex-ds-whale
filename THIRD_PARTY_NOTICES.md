@@ -36,6 +36,10 @@ v1.2.0 新增 15 张任务与陪伴姿势，逐字节取自上游提交 `5355197
 
 交互设计参考了公开桌宠设计思路，未复制参考“大肥鱼”仓库的代码。本项目不是 OpenAI 或原角色作者的官方产品。
 
+## 可选的 DSH Q 版素材
+
+Q 版上游为 [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)。动画与参照该形象生成的注视、铁盆吃饭补帧采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)。源码的 `artwork/dsh-chibi/LICENSE.md` 与 Q 版生成包的 `pet/APPEARANCE-LICENSE.md` 保留原作者、来源与改动说明。基础离线包不带这些美术文件。
+
 ## CPython 嵌入式运行时
 
 Release 随附来自 [python.org](https://www.python.org/downloads/windows/) 的官方 CPython 3.13.17 Windows x64 嵌入式运行时，源码包安装时也从该官方来源下载。该运行时仅在项目目录内使用，不安装到全局。

@@ -216,9 +216,10 @@ class Activity:
 
     def update(self,now):
         for view in self.views.values():view.derive(now)  # Only content-free projections are retained.
-        active=[view for view in self.views.values() if view.active or view.mode=='waiting']
+        waiting=[view for view in self.views.values() if view.mode=='waiting']
+        active=[view for view in self.views.values() if view.active]
         terminal=[view for view in self.views.values() if now<view.terminal_until]
-        view=max(active or terminal,key=lambda view:view.started,default=None)
+        view=max(waiting or active or terminal,key=lambda view:view.started,default=None)
         candidate=view.mode if view else 'idle'
         if self.candidate!=candidate:self.candidate,self.since=candidate,now
         if candidate in ('waiting','failure') or now-self.since>=.25:

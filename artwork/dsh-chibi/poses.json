@@ -1,0 +1,36 @@
+{
+  "gaze": {
+    "description": "registered full-body poses in the DSH chibi reference style",
+    "tool": "OpenAI ImageGen",
+    "original_sheet_sha256": "281fc5f36f36f12425d4207db6fadbb6186fee6815554416a706a900d6c9ac89",
+    "files": {
+      "gaze-00.png": "3b8bcac066919e874fe1b120f9d5d0e4fc583ab1e068c013109b2ced3985f1b4",
+      "gaze-01.png": "5121f00a463096d9e3e4f7ddfeb30354b9bd1c2fe0f1412f143367dc42e8ffe4",
+      "gaze-02.png": "d7a227846db1911e4c818335ba6edb12a42bdd3f5dfa32660ffee7751af8b10d",
+      "gaze-03.png": "d14b866c2beedd728b96963efe7c6573db765fb7890f202fbf2dae9668e309bc",
+      "gaze-04.png": "dd9019003285c44e931600104f774c40173fb2425fdb4d7f598844d85ed52b7f",
+      "gaze-05.png": "8d959384ac1b3f9f841f5a4f6a6d7d2fdfe9f2498e116145068742d3e38ca154",
+      "gaze-06.png": "d6dde842f0a5f76d942d0ca33126b13ea1832a43e974e8518838aa5c83784f1a",
+      "gaze-07.png": "4510432034e9a1bb48583652f2c1d62600c5d06d9cb665258ea73423f15677b3",
+      "gaze-08.png": "9fc9faa2cdf0e8ed9342a2b5f2187bd0ec3bcb77dc23dc1167c41468459415fb",
+      "gaze-09.png": "fe85fdead3a01bb781bd344fb4a68e79029cbd5d831c981ddd924d9826be9483",
+      "gaze-10.png": "6163fc380f8e0f1cfcf66726fb22e9430192d0fedc4a342290ddabc5135bb612",
+      "gaze-11.png": "204924d04c61eb086bdad273df767dbab6edf89ab35ad13f5fbdf131ecc67dc0",
+      "gaze-12.png": "f8c3f87027d3dc41591880a27d01309d014a5fe386f4a7cc1d5bb94489c4b8d7",
+      "gaze-13.png": "689c97089f08d6bac365fcac1483b508980ad78e1b8684cf513e9df7e2b7bdcf",
+      "gaze-14.png": "9fd45883b0608223d8ccaec31e1e5e12779971e797fe6f2a1a0d37a79408876e",
+      "gaze-15.png": "8e03384c04e446de8e9c9789194a95d583b43e89fc86d259e38fb0acc4821e70"
+    }
+  },
+  "rice": {
+    "description": "registered full-body poses in the DSH chibi reference style",
+    "tool": "OpenAI ImageGen",
+    "original_sheet_sha256": "449ad653fac35866a867cf14983da964ff05505a04bb22f6db79b72ad2db3129",
+    "files": {
+      "rice-00.png": "1f181c9804676e640d20f7e39f02174f3f87ae1e564b86df6e168f6c4058379f",
+      "rice-01.png": "ba94c80d9bf2038736049478aaea5073ed7363f5474e5f5a3737128e341ff0ec",
+      "rice-02.png": "400bb0de64eeb0a4ed6584903b78b86851281b2d1222eec39c712d44cf5d5304",
+      "rice-03.png": "c614915f76cc2d41c07b5f1ab4991d7e0bad40f65f7f656715e8110e0683cf73"
+    }
+  }
+}

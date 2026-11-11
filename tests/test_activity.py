@@ -125,6 +125,17 @@ class ActivityTests(unittest.TestCase):
         activity.update(0)
         self.assertEqual(activity.update(.3),'editing')
 
+    def test_pending_approval_in_older_thread_takes_priority(self):
+        activity=Activity()
+        older,newer=ActivityView(),ActivityView()
+        older.accept(snapshot(started=10,requests=[{'type':'approval'}]),'owner',0)
+        newer.accept(snapshot(started=20),'owner',0)
+        activity.views={'old':older,'new':newer}
+        self.assertEqual(activity.update(0),'waiting')
+        older.accept(patch(['requests',0],None,op='remove'),'owner',1)
+        activity.update(1)
+        self.assertEqual(activity.update(1.3),'thinking')
+
     def test_readonly_discovery_ignores_backups_and_respects_archived(self):
         with tempfile.TemporaryDirectory() as temp:
             home=Path(temp)

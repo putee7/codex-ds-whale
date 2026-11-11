@@ -371,12 +371,16 @@ def wait_for_exit(pid,timeout,executable=None):
             return  # The recorded process has already exited.
         raise ct.WinError(ct.get_last_error())
     try:
+        wait_ms=max(0,int(timeout*1000))
         value,size=ct.create_unicode_buffer(32768),wt.DWORD(32768)
         if not kernel.QueryFullProcessImageNameW(handle,0,value,ct.byref(size)):
-            raise ct.WinError(ct.get_last_error())
+            error=ct.get_last_error()
+            if kernel.WaitForSingleObject(handle,wait_ms)==0:
+                return  # A terminating process can lose its image name before its handle closes.
+            raise ct.WinError(error)
         if executable and Path(value.value).resolve()!=Path(executable).resolve():
             return  # PID was reused after our process exited; do not wait on another application.
-        result=kernel.WaitForSingleObject(handle,max(0,int(timeout*1000)))
+        result=kernel.WaitForSingleObject(handle,wait_ms)
         if result==258:
             raise TimeoutError('Controller process is still unloading; no runtime files were replaced.')
         if result!=0:

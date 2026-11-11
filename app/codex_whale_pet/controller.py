@@ -5,7 +5,8 @@ import uuid
 from pathlib import Path
 
 from .behavior import FollowState, HoverState, on_body, replay_webp
-from .files import BASE, PET_ID, OWNER, atomic_bytes, atomic_json, contained, control_dir, digest, read_json
+from .files import BASE, PET_ID, OWNER, atomic_bytes, atomic_json, contained, control_dir, digest, owned_paths, read_json
+from .playback import Playback, SLEEP, URGENT, validate_bank
 from . import __version__,selection
 
 
@@ -29,14 +30,21 @@ def run(home, allow_untested=False):
     modes=metadata['activity_modes']
     if any(digest(contained(folder,value['path'],True))!=value['sha256'] for value in modes.values()):
         raise ValueError('A work mode template was changed.')
-    owned={BASE,live,*(value['path'] for value in modes.values()),*(f'{bank}/{index:02}.webp' for index in range(16))}
+    animation_bank=metadata.get('animation_bank')
+    validate_bank(folder,animation_bank)
+    clips=animation_bank['clips'] if animation_bank else {}
+    extras={key:clips[key] for key in animation_bank['hover']} if animation_bank else {}
+    owned=owned_paths(metadata)
     manifest_path=folder/'pet.json'
     expected={key:value for key,value in read_json(manifest_path).items() if key!='spritesheetPath'}
     status_path=folder/'motion-status.json'
     source_mtime=(folder/'spritesheet.webp').stat().st_mtime_ns
     ipc=None
     active_path=read_json(manifest_path)['spritesheetPath']
-    follow,hover=FollowState(),HoverState(actions)
+    def reset_playback():
+        return FollowState(),HoverState(actions,extras=extras),Playback(animation_bank) if animation_bank else None
+
+    follow,hover,playback=reset_playback()
     changes,last_write,last_mode,last_check,last_geometry_check,last_click,last_switch=0,0.,None,0.,0.,0.,0.
     layout,last_action=None,None
     version,last_version_check=None,0.
@@ -57,12 +65,13 @@ def run(home, allow_untested=False):
         if state=='running' and activity_mode!=previous_activity:
             activity_seen[activity_mode]=activity_seen.get(activity_mode,0)+1
             previous_activity=activity_mode
-        mode=(state,reason,hover.current,active_path,changes,activity_mode)
+        mode=(state,reason,hover.current,active_path,changes,activity_mode,last_action)
         if force or mode!=last_mode or time.monotonic()-last_write>=10:
             atomic_json(status_path,{'state':state,'reason':reason,'pid':os.getpid(),
                 'updated_at':time.strftime('%Y-%m-%dT%H:%M:%S'),'direction':follow.previous,
                 'gaze_mode':('hover' if hover.current else 'hover_rest') if hover.inside else follow.reason,
                 'hover_action':hover.current,'active_asset':active_path,'asset_changes':changes,
+                'animation_clip':last_action if state=='running' and last_action in clips else None,
                 'range_dip':500,'idle_seconds':4,'native_window_only':True,'client_files_modified':False,
                 'allow_untested':allow_untested,'codex_version':version,'activity_mode':activity_mode,
                 'activity_reason':ipc.activity.reason if ipc else 'disconnected',
@@ -106,7 +115,7 @@ def run(home, allow_untested=False):
                         observed=win.running_version()
                         if version!=observed:
                             layout,last_action=None,None
-                            follow,hover=FollowState(),HoverState(actions)
+                            follow,hover,playback=reset_playback()
                         version=observed
                         last_version_check=now
                     if ipc is None:
@@ -120,7 +129,8 @@ def run(home, allow_untested=False):
                     selected=win.selected_pet(home)
                     if selected!=PET_ID:
                         switch(BASE)
-                        follow,hover=FollowState(),HoverState(actions)
+                        follow,hover,playback=reset_playback()
+                        last_action=None
                         if selection.migrated(home,selected):
                             status('cloud_migration_conflict','The selected cloud whale does not read local motion assets. Run Repair.cmd, then close Codex once.')
                         else:
@@ -141,21 +151,25 @@ def run(home, allow_untested=False):
                         continue
                     point=win.cursor()
                     target=follow.update(point,layout['center'],layout['scale'],now)
-                    action=hover.update(on_body(point,layout,6 if hover.inside else 0),now)
                     activity_mode=ipc.activity.update(now)
-                    if activity_mode=='idle' and not hover.inside:
-                        absent=now-follow.last_motion
+                    inside=on_body(point,layout,6 if hover.inside else 0)
+                    absent=now-follow.last_motion
+                    if activity_mode=='idle' and not inside:
                         activity_mode='sleep' if absent>=600 else 'afk' if absent>=180 else 'greeting' if now-ipc.connected_at<2 else 'idle'
-                    path=(live if action else BASE if hover.inside else modes[activity_mode]['path'] if activity_mode!='idle'
-                        else BASE if target is None else f'{bank}/{target:02}.webp')
-                    triggered=action is not None and action!=last_action
+                    animation=playback.update(activity_mode,now,suppressed=inside and activity_mode not in URGENT,
+                        idle_allowed=target is None and absent>=15) if playback else None
+                    action=hover.update(inside and activity_mode not in URGENT and animation!=SLEEP[2],now)
+                    replay=action or animation
+                    path=(live if replay
+                        else modes[activity_mode]['path'] if activity_mode!='idle'
+                        else BASE if hover.inside or target is None else f'{bank}/{target:02}.webp')
+                    triggered=replay is not None and replay!=last_action
                     if (path!=active_path or triggered) and now-last_switch>=.12:
                         if triggered:
-                            atomic_bytes(live_path,replay_webp(templates[action],uuid.uuid4().hex))
+                            template=templates[replay] if replay in templates else contained(folder,clips[replay]['path'],True).read_bytes()
+                            atomic_bytes(live_path,replay_webp(template,uuid.uuid4().hex))
                         switch(path,triggered)
-                        last_switch,last_action=now,action
-                    if action is None:
-                        last_action=None
+                        last_switch,last_action=now,replay
                     status('running')
                     time.sleep(.06)
                 except win.DesktopUnavailable as error:
@@ -165,7 +179,7 @@ def run(home, allow_untested=False):
                         ipc.close()
                         ipc=None
                     layout,last_action=None,None
-                    follow,hover=FollowState(),HoverState(actions)
+                    follow,hover,playback=reset_playback()
                     status('waiting_for_desktop',str(error))
                     time.sleep(.5)
                 except win.NotReady as error:
@@ -181,7 +195,7 @@ def run(home, allow_untested=False):
                         except (ValueError,RuntimeError) as repair_error:
                             repair_issue=str(repair_error)
                     layout,last_action=None,None
-                    follow,hover=FollowState(),HoverState(actions)
+                    follow,hover,playback=reset_playback()
                     status('repair_required' if repair_issue else 'waiting',repair_issue or str(error))
                     time.sleep(.5)
             status('stopped','Stop requested.',True)

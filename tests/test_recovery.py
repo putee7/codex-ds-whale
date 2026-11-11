@@ -42,6 +42,20 @@ class TaskTests(unittest.TestCase):
                 process.terminate()
                 process.wait(timeout=5)
 
+    @unittest.skipUnless(os.name=='nt','Windows process lifecycle')
+    def test_image_query_failure_requires_a_signaled_process_handle(self):
+        from codex_whale_pet import windows as win
+        with mock.patch.object(win,'kernel') as kernel, mock.patch.object(win.ct,'get_last_error',return_value=31):
+            kernel.OpenProcess.return_value=123
+            kernel.QueryFullProcessImageNameW.return_value=0
+            kernel.WaitForSingleObject.return_value=0
+            win.wait_for_exit(1234,1,sys.executable)
+            kernel.WaitForSingleObject.assert_called_once_with(123,1000)
+            kernel.WaitForSingleObject.return_value=258
+            with self.assertRaises(OSError) as error:
+                win.wait_for_exit(1234,1,sys.executable)
+            self.assertEqual(error.exception.winerror,31)
+
     def test_task_has_no_elevation_and_uses_quoted_installed_entrypoint(self):
         root=Path(tempfile.gettempdir())/'whale space & bracket [test]'
         record={'pythonw':str(root/'runtime/pythonw.exe'),'install_root':str(root)}
